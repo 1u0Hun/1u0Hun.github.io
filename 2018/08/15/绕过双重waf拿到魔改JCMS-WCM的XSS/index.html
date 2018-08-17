@@ -6,16 +6,29 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>Archives | 1u0Hun博客</title>
+  <title>绕过双重WAF拿到魔改JCMS+WCM的XSS | 1u0Hun博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="keywords" content="自由 和平">
-<meta property="og:type" content="website">
-<meta property="og:title" content="1u0Hun博客">
-<meta property="og:url" content="http://yoursite.com/archives/index.html">
+  <meta name="description" content="0x00 前言 最近突然一脸懵逼被迫，卖血卖肾做渗透，给了几个域名，打开一看，emmm。。。。,逗我呢，这不就是一个站吗？作为一个只想摸鱼的菜鸡，对于这种问题，当然是想着怎么手撸，不要问我为什么手撸，表示没做过三无网站：“无墙无狗无WAF”。 0x01 前期信息收集作为一个手撸党，当然也不可能纯手撸站，还是需要我们的一些经典工具，只是不能漏扫，不能扫目录这样的，当然慢慢扫也是可以的，前提是你的代理">
+<meta name="keywords" content="XSS">
+<meta property="og:type" content="article">
+<meta property="og:title" content="绕过双重WAF拿到魔改JCMS+WCM的XSS">
+<meta property="og:url" content="http://yoursite.com/2018/08/15/绕过双重waf拿到魔改JCMS-WCM的XSS/index.html">
 <meta property="og:site_name" content="1u0Hun博客">
+<meta property="og:description" content="0x00 前言 最近突然一脸懵逼被迫，卖血卖肾做渗透，给了几个域名，打开一看，emmm。。。。,逗我呢，这不就是一个站吗？作为一个只想摸鱼的菜鸡，对于这种问题，当然是想着怎么手撸，不要问我为什么手撸，表示没做过三无网站：“无墙无狗无WAF”。 0x01 前期信息收集作为一个手撸党，当然也不可能纯手撸站，还是需要我们的一些经典工具，只是不能漏扫，不能扫目录这样的，当然慢慢扫也是可以的，前提是你的代理">
 <meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://yoursite.com/img/JCMS.png">
+<meta property="og:image" content="http://yoursite.com/img/IDS.png">
+<meta property="og:image" content="http://yoursite.com/img/safedog.png">
+<meta property="og:image" content="http://yoursite.com/img/af.png">
+<meta property="og:image" content="http://yoursite.com/img/shenqing.png">
+<meta property="og:image" content="http://yoursite.com/img/bijie.png">
+<meta property="og:image" content="http://yoursite.com/img/bijixss.png">
+<meta property="og:image" content="http://yoursite.com/img/xsspayload.png">
+<meta property="og:updated_time" content="2018-08-17T01:40:02.379Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="1u0Hun博客">
+<meta name="twitter:title" content="绕过双重WAF拿到魔改JCMS+WCM的XSS">
+<meta name="twitter:description" content="0x00 前言 最近突然一脸懵逼被迫，卖血卖肾做渗透，给了几个域名，打开一看，emmm。。。。,逗我呢，这不就是一个站吗？作为一个只想摸鱼的菜鸡，对于这种问题，当然是想着怎么手撸，不要问我为什么手撸，表示没做过三无网站：“无墙无狗无WAF”。 0x01 前期信息收集作为一个手撸党，当然也不可能纯手撸站，还是需要我们的一些经典工具，只是不能漏扫，不能扫目录这样的，当然慢慢扫也是可以的，前提是你的代理">
+<meta name="twitter:image" content="http://yoursite.com/img/JCMS.png">
   
     <link rel="alternative" href="/atom.xml" title="1u0Hun博客" type="application/atom+xml">
   
@@ -167,36 +180,80 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-绕过双重waf拿到魔改JCMS-WCM的XSS" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2018" class="archive-year">2018</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/08/15/绕过双重waf拿到魔改JCMS-WCM的XSS/" class="archive-article-date">
-  	<time datetime="2018-08-15T12:04:50.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-08-15</time>
-</a>
-        </div>
-    	 
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/08/15/绕过双重waf拿到魔改JCMS-WCM的XSS/">绕过双重WAF拿到魔改JCMS+WCM的XSS</a>
+    <h1 class="article-title" itemprop="name">
+      绕过双重WAF拿到魔改JCMS+WCM的XSS
     </h1>
   
 
-        <div class="article-info info-on-right">
-          
+        
+        <a href="/2018/08/15/绕过双重waf拿到魔改JCMS-WCM的XSS/" class="archive-article-date">
+  	<time datetime="2018-08-15T12:04:50.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-08-15</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h1><p> 最近突然一脸懵逼被迫，卖血卖肾做渗透，给了几个域名，打开一看，emmm。。。。,逗我呢，这不就是一个站吗？作为一个只想摸鱼的菜鸡，对于这种问题，当然是想着怎么手撸，不要问我为什么手撸，表示没做过三无网站：“无墙无狗无WAF”。</p>
+<h1 id="0x01-前期信息收集"><a href="#0x01-前期信息收集" class="headerlink" title="0x01 前期信息收集"></a>0x01 前期信息收集</h1><p>作为一个手撸党，当然也不可能纯手撸站，还是需要我们的一些经典工具，只是不能漏扫，不能扫目录这样的，当然慢慢扫也是可以的，前提是你的代理多，要不然分分钟教你做人-论如何花式封IP，推荐一个很好的安全导航~渗透师，直接百度即可，通过一些ping，Zoomeye，fofa，简单测试了下就知道域名直接ping的IP并不是真实IP，应该是用了CDN加速，但是却没有云waf，看来并不是某云waf厂商的盾，后来感觉貌似是某服的产品，难怪封IP的姿势如此熟悉，既然是某服防火墙，那我还是认命吧，一个个功能点看，一定要记得查看所有的源代码，很多时候查看源代码能泄露出很多信息，通过各种查看，发现是大汉JCMS跟拓尔思IDS WCM做的一个综合网站</p>
+<p>大汉JCMS</p>
+<p><img src="\img\JCMS.png" alt="大汉JCMS"></p>
+<p>拓尔思TRS</p>
+<p><img src="\img\IDS.png" alt="TRS"></p>
+<p>安全狗</p>
+<p><img src="\img\safedog.png" alt="安全狗"></p>
+<p>某服防火墙</p>
+<p><img src="\img\af.png" alt="某服防火墙"></p>
+<h1 id="0x02-漏洞点"><a href="#0x02-漏洞点" class="headerlink" title="0x02 漏洞点"></a>0x02 漏洞点</h1><p>  手撸党于是在一个个坑中走，当然网上也找到了很多历史版本的漏洞，但是由于该站魔改，目录啥的都不一样，还将大多数有漏洞利用点的接口删除，看来还是个机智的网站，最后自己在体验该网站的各项功能时，发现一个可以信息公开查询的登录，emmm。。。感觉这个貌似并不需要注册登录的那种吧，一般这类网站是没有注册点的，后来果然，发现是自己写一项建议，然后会生成一个长数字串，利用建议的发起人和长数字串就可以登录查询自己所提的建议，这下自己填写的东西就可以回显查看了。</p>
+<p>漏洞点</p>
+<p><img src="\img\shenqing.png" alt=""></p>
+<p>利用方式：建议一开始不要使用什么敏感的标签，碰到变态防火墙很容易直接被封IP，可以只用h1，p，b之类的无害标签，于是拿h1标签测试了一下</p>
+<p><img src="\img\bijie.png" alt=""></p>
+<p>可以看到名字那里格外的大。。。对，就是格外的大，说明我们的h1标签起作用了，至少一个html到手，也说明对于标签的&lt;&gt;等并没有过滤，只是敏感标签会被防火墙以及狗给拦截，尝试了常用的img , script ,a ，audio，video，svg发现都不太行，但幸好对于on事件拦截的不够，后来神队友上线送了一个payload，至今觉得很牛皮，应该目前没有什么厂商可以拦截到，透漏下是p标签的</p>
+<p><img src="\img\bijixss.png" alt="1534469502706"></p>
+<p>神payload：</p>
+<p><img src="\img\xsspayload.png" alt="1534469653334"></p>
+<h1 id="0x03后记"><a href="#0x03后记" class="headerlink" title="0x03后记"></a>0x03后记</h1><p>由于给的一批网站都一个模板，后来又找到点信息泄露，勉强完成了整个渗透工作，但是还是觉得很菜，毕竟没有shell的渗透都是假渗透，对于整个过程总结一下，做渗透测试时一定要注意前期信息收集，虽然这个过程会让你比别的小伙伴速度慢点，但是信息搜集好了，在后边做渗透的过程你可能会更容易发现一些不容易看出来的点。</p>
+
+      
+
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>大爷，感谢打赏<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    
+                    <div class="reward-box-item">
+                      <img class="reward-img" src="/img/weixin.png">
+                      <span class="reward-type">微信</span>
+                    </div>
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
@@ -208,7 +265,7 @@
 		</ul>
 	</div>
 
-          
+      
 	<div class="article-category tagcloud">
 		<i class="icon-book icon"></i>
 		<ul class="article-tag-list">
@@ -221,109 +278,104 @@
 	</div>
 
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=http://yoursite.com/2018/08/15/绕过双重waf拿到魔改JCMS-WCM的XSS/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/08/15/你好-HEXO/" class="archive-article-date">
-  	<time datetime="2018-08-15T04:37:19.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-08-15</time>
-</a>
+<nav id="article-nav">
+  
+  
+    <a href="/2018/08/15/你好-HEXO/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">你好,HEXO</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
+        
+        
+    </div>
+</aside>
+
+
+
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/08/15/你好-HEXO/">你好,HEXO</a>
-    </h1>
+  
   
 
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/08/15/Hello-Blog/" class="archive-article-date">
-  	<time datetime="2018-08-15T02:36:56.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-08-15</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/08/15/Hello-Blog/">Hello Blog</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Love</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/08/15/hello-world/" class="archive-article-date">
-  	<time datetime="2018-08-15T02:30:45.759Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-08-15</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/08/15/hello-world/">Hello World</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
   
-  
-    </div></section>
-  
-
-    
 
 
           </div>
@@ -346,8 +398,8 @@
 	var yiliaConfig = {
 		mathjax: true,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,
