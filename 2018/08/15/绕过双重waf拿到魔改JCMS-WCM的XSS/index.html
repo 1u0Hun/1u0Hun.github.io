@@ -16,19 +16,19 @@
 <meta property="og:site_name" content="1u0Hun博客">
 <meta property="og:description" content="0x00 前言 最近突然一脸懵逼被迫，卖血卖肾做渗透，给了几个域名，打开一看，emmm。。。。,逗我呢，这不就是一个站吗？作为一个只想摸鱼的菜鸡，对于这种问题，当然是想着怎么手撸，不要问我为什么手撸，表示没做过三无网站：“无墙无狗无WAF”。 0x01 前期信息收集作为一个手撸党，当然也不可能纯手撸站，还是需要我们的一些经典工具，只是不能漏扫，不能扫目录这样的，当然慢慢扫也是可以的，前提是你的代理">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="http://yoursite.com/img/JCMS.png">
-<meta property="og:image" content="http://yoursite.com/img/IDS.png">
+<meta property="og:image" content="http://yoursite.com/2018/08/15/绕过双重waf拿到魔改JCMS-WCM的XSS/img/大汉jcms.png">
+<meta property="og:image" content="http://yoursite.com/img/trs.png">
 <meta property="og:image" content="http://yoursite.com/img/safedog.png">
 <meta property="og:image" content="http://yoursite.com/img/af.png">
 <meta property="og:image" content="http://yoursite.com/img/shenqing.png">
-<meta property="og:image" content="http://yoursite.com/img/bijie.png">
+<meta property="og:image" content="http://yoursite.com/img/liyong.png">
 <meta property="og:image" content="http://yoursite.com/img/bijixss.png">
 <meta property="og:image" content="http://yoursite.com/img/xsspayload.png">
-<meta property="og:updated_time" content="2018-08-17T01:40:02.379Z">
+<meta property="og:updated_time" content="2018-08-17T01:53:47.805Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="绕过双重WAF拿到魔改JCMS+WCM的XSS">
 <meta name="twitter:description" content="0x00 前言 最近突然一脸懵逼被迫，卖血卖肾做渗透，给了几个域名，打开一看，emmm。。。。,逗我呢，这不就是一个站吗？作为一个只想摸鱼的菜鸡，对于这种问题，当然是想着怎么手撸，不要问我为什么手撸，表示没做过三无网站：“无墙无狗无WAF”。 0x01 前期信息收集作为一个手撸党，当然也不可能纯手撸站，还是需要我们的一些经典工具，只是不能漏扫，不能扫目录这样的，当然慢慢扫也是可以的，前提是你的代理">
-<meta name="twitter:image" content="http://yoursite.com/img/JCMS.png">
+<meta name="twitter:image" content="http://yoursite.com/2018/08/15/绕过双重waf拿到魔改JCMS-WCM的XSS/img/大汉jcms.png">
   
     <link rel="alternative" href="/atom.xml" title="1u0Hun博客" type="application/atom+xml">
   
@@ -203,22 +203,22 @@
         <h1 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h1><p> 最近突然一脸懵逼被迫，卖血卖肾做渗透，给了几个域名，打开一看，emmm。。。。,逗我呢，这不就是一个站吗？作为一个只想摸鱼的菜鸡，对于这种问题，当然是想着怎么手撸，不要问我为什么手撸，表示没做过三无网站：“无墙无狗无WAF”。</p>
 <h1 id="0x01-前期信息收集"><a href="#0x01-前期信息收集" class="headerlink" title="0x01 前期信息收集"></a>0x01 前期信息收集</h1><p>作为一个手撸党，当然也不可能纯手撸站，还是需要我们的一些经典工具，只是不能漏扫，不能扫目录这样的，当然慢慢扫也是可以的，前提是你的代理多，要不然分分钟教你做人-论如何花式封IP，推荐一个很好的安全导航~渗透师，直接百度即可，通过一些ping，Zoomeye，fofa，简单测试了下就知道域名直接ping的IP并不是真实IP，应该是用了CDN加速，但是却没有云waf，看来并不是某云waf厂商的盾，后来感觉貌似是某服的产品，难怪封IP的姿势如此熟悉，既然是某服防火墙，那我还是认命吧，一个个功能点看，一定要记得查看所有的源代码，很多时候查看源代码能泄露出很多信息，通过各种查看，发现是大汉JCMS跟拓尔思IDS WCM做的一个综合网站</p>
 <p>大汉JCMS</p>
-<p><img src="\img\JCMS.png" alt="大汉JCMS"></p>
+<p><img src="img\大汉jcms.png" alt="大汉JCMS"></p>
 <p>拓尔思TRS</p>
-<p><img src="\img\IDS.png" alt="TRS"></p>
+<p><img src="\img\trs.png" alt="TRS"></p>
 <p>安全狗</p>
 <p><img src="\img\safedog.png" alt="安全狗"></p>
 <p>某服防火墙</p>
 <p><img src="\img\af.png" alt="某服防火墙"></p>
 <h1 id="0x02-漏洞点"><a href="#0x02-漏洞点" class="headerlink" title="0x02 漏洞点"></a>0x02 漏洞点</h1><p>  手撸党于是在一个个坑中走，当然网上也找到了很多历史版本的漏洞，但是由于该站魔改，目录啥的都不一样，还将大多数有漏洞利用点的接口删除，看来还是个机智的网站，最后自己在体验该网站的各项功能时，发现一个可以信息公开查询的登录，emmm。。。感觉这个貌似并不需要注册登录的那种吧，一般这类网站是没有注册点的，后来果然，发现是自己写一项建议，然后会生成一个长数字串，利用建议的发起人和长数字串就可以登录查询自己所提的建议，这下自己填写的东西就可以回显查看了。</p>
 <p>漏洞点</p>
-<p><img src="\img\shenqing.png" alt=""></p>
+<p><img src="\img\shenqing.png" alt="漏洞点"></p>
 <p>利用方式：建议一开始不要使用什么敏感的标签，碰到变态防火墙很容易直接被封IP，可以只用h1，p，b之类的无害标签，于是拿h1标签测试了一下</p>
-<p><img src="\img\bijie.png" alt=""></p>
+<p><img src="\img\liyong.png" alt="回显"></p>
 <p>可以看到名字那里格外的大。。。对，就是格外的大，说明我们的h1标签起作用了，至少一个html到手，也说明对于标签的&lt;&gt;等并没有过滤，只是敏感标签会被防火墙以及狗给拦截，尝试了常用的img , script ,a ，audio，video，svg发现都不太行，但幸好对于on事件拦截的不够，后来神队友上线送了一个payload，至今觉得很牛皮，应该目前没有什么厂商可以拦截到，透漏下是p标签的</p>
-<p><img src="\img\bijixss.png" alt="1534469502706"></p>
+<p><img src="\img\bijixss.png" alt="xss"></p>
 <p>神payload：</p>
-<p><img src="\img\xsspayload.png" alt="1534469653334"></p>
+<p><img src="\img\xsspayload.png" alt="payload"></p>
 <h1 id="0x03后记"><a href="#0x03后记" class="headerlink" title="0x03后记"></a>0x03后记</h1><p>由于给的一批网站都一个模板，后来又找到点信息泄露，勉强完成了整个渗透工作，但是还是觉得很菜，毕竟没有shell的渗透都是假渗透，对于整个过程总结一下，做渗透测试时一定要注意前期信息收集，虽然这个过程会让你比别的小伙伴速度慢点，但是信息搜集好了，在后边做渗透的过程你可能会更容易发现一些不容易看出来的点。</p>
 
       
