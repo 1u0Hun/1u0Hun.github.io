@@ -35,7 +35,7 @@
 <meta property="og:image" content="http://yoursite.com/img/1534734070449.png">
 <meta property="og:image" content="http://yoursite.com/img/1534734083464.png">
 <meta property="og:image" content="http://yoursite.com/img/1534734096727.png">
-<meta property="og:updated_time" content="2018-08-20T03:02:53.884Z">
+<meta property="og:updated_time" content="2018-08-20T08:24:07.299Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="常见windows隐藏文件方式总结">
 <meta name="twitter:description" content="0x00 前言由于最近在看一些黑链等资料，对于如何在windows下隐藏文件或者文件目录略感兴趣，于是顺便学习了一下 0x01 直接隐藏直接隐藏，在文件夹的属性隐藏中勾选即可，可以通过打开隐藏文件显示以及显示文件后缀名的方式查看 将文件简单隐藏                                               可以看到该文件夹已经被隐藏     打开查看隐藏的项目，即可看">
@@ -236,6 +236,10 @@
 <p>   <img src="\img\1534733941324.png" alt="1534733941324"></p>
 <h2 id="0x05-特殊文件名"><a href="#0x05-特殊文件名" class="headerlink" title="0x05 特殊文件名"></a>0x05 特殊文件名</h2><p>实质上就是系统设备名，是Windows系统保留的文件名，普通方法无法访问，主要有：lpt1-9，aux，com1-9，prn，nul，con，nul, clocks 例如：lpt.txt com1.txt </p>
 <p><img src="\img\1534733985136.png" alt="1534733985136"></p>
+<p>如果目录较复杂，例如C:Inetpub\wwwroot\COM6.KEY_shell.asp</p>
+<p>此时查看时为</p>
+<p>type .C:InetpubwwwrootCOM6.KEY_shell.asp</p>
+<p>如果这种方式无法查看，还可以用dir /x找到真实文件名，然后在运行中输出该完整目录即可</p>
 <p>删除</p>
 <p>del /f /q /a .c:aux.txt</p>
 <h2 id="0x06-GUID-windows-预留隐藏"><a href="#0x06-GUID-windows-预留隐藏" class="headerlink" title="0x06 GUID windows 预留隐藏"></a>0x06 GUID windows 预留隐藏</h2><p>我的电脑: {20D04FE0-3AEA-1069-A2D8-08002B30309D}<br> 回收站: {645FF040-5081-101B-9F08-00AA002F954E}<br> 桌面: {00021400-0000-0000-C000-000000000046}<br> 控制面板: {21EC2020-3AEA-1069-A2DD-08002B30309D}<br> 打印机: {2227A280-3AEA-1069-A2DE-08002B30309D}<br> 拔号网络: {A4D92740-67CD-11CF-96F2-00AA00A11DD9}<br> 字体: {BD84B380-8CA2-1069-AB1D-08000948F534}<br> IE: {871C5380-42A0-1069-A2EA-08002B30309D}<br> Outlook: {00020D75-0000-0000-C000-000000000046}<br> 网络邻居: {208D2C60-3AEA-1069-A2D7-08002B30309D}<br> 历史文件夹: {FF393560-C2A7-11CF-BFF4-444553540000}<br> 公文包: {85BBD920-42A0-1069-A2E4-08002B30309D}<br> 网络缓存文件夹: {7BD29E00-76C1-11CF-9DD0-00A0C9034933}<br> ActiveX缓存文件夹: {88C6C381-2E85-11D0-94DE-444553540000}</p>
@@ -518,11 +522,11 @@ MathJax.Hub.Queue(function() {
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">XSS</a>
+                <a href="javascript:void(0)" class="js-tag color3">windows</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">windows</a>
+                <a href="javascript:void(0)" class="js-tag color4">XSS</a>
               </li>
             
             <div class="clearfix"></div>
