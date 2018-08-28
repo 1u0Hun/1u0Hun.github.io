@@ -6,16 +6,26 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>Archives: 2018 | 1u0Hun博客</title>
+  <title>SSRF简单学习总结 | 1u0Hun博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="keywords" content="自由 和平">
-<meta property="og:type" content="website">
-<meta property="og:title" content="1u0Hun博客">
-<meta property="og:url" content="http://yoursite.com/archives/2018/index.html">
+  <meta name="description" content="0x00 前言笔者由于之前对于SSRF，仅仅处于科普阶段，目前在渗透测试中，也只遇到过一例weblogic的SSRF漏洞，当然可能是由于笔者对此不熟悉，导致没有发现有该漏洞的地方，因此决定痛改前非，整体学习一下SSRF。 0x01 SSRF概述SSRF 即服务器端请求伪造，利用该漏洞可以发起内网攻击，危害巨大，但是由于一般开发者仅仅对于比较常见的SQL注入，XSS等比较熟悉，因此在开发时，可能会疏">
+<meta name="keywords" content="SSRF WEB安全">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SSRF简单学习总结">
+<meta property="og:url" content="http://yoursite.com/2018/08/20/SSRF简单学习总结/index.html">
 <meta property="og:site_name" content="1u0Hun博客">
+<meta property="og:description" content="0x00 前言笔者由于之前对于SSRF，仅仅处于科普阶段，目前在渗透测试中，也只遇到过一例weblogic的SSRF漏洞，当然可能是由于笔者对此不熟悉，导致没有发现有该漏洞的地方，因此决定痛改前非，整体学习一下SSRF。 0x01 SSRF概述SSRF 即服务器端请求伪造，利用该漏洞可以发起内网攻击，危害巨大，但是由于一般开发者仅仅对于比较常见的SQL注入，XSS等比较熟悉，因此在开发时，可能会疏">
 <meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://yoursite.com/img/1534764437574.png">
+<meta property="og:image" content="http://yoursite.com/img/1534814513491.png">
+<meta property="og:image" content="http://yoursite.com/img/1534816130523.png">
+<meta property="og:image" content="http://yoursite.com/img/1534816899993.png">
+<meta property="og:image" content="http://yoursite.com/img/1534818901576.png">
+<meta property="og:updated_time" content="2018-08-21T02:45:10.938Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="1u0Hun博客">
+<meta name="twitter:title" content="SSRF简单学习总结">
+<meta name="twitter:description" content="0x00 前言笔者由于之前对于SSRF，仅仅处于科普阶段，目前在渗透测试中，也只遇到过一例weblogic的SSRF漏洞，当然可能是由于笔者对此不熟悉，导致没有发现有该漏洞的地方，因此决定痛改前非，整体学习一下SSRF。 0x01 SSRF概述SSRF 即服务器端请求伪造，利用该漏洞可以发起内网攻击，危害巨大，但是由于一般开发者仅仅对于比较常见的SQL注入，XSS等比较熟悉，因此在开发时，可能会疏">
+<meta name="twitter:image" content="http://yoursite.com/img/1534764437574.png">
   
     <link rel="alternative" href="/atom.xml" title="1u0Hun博客" type="application/atom+xml">
   
@@ -167,74 +177,91 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-SSRF简单学习总结" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2018" class="archive-year">2018</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/08/28/struts2-057复现/" class="archive-article-date">
-  	<time datetime="2018-08-28T01:44:52.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-08-28</time>
-</a>
-        </div>
-    	 
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/08/28/struts2-057复现/">struts2-057复现</a>
+    <h1 class="article-title" itemprop="name">
+      SSRF简单学习总结
     </h1>
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">struts2 漏洞复现</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/08/20/SSRF简单学习总结/" class="archive-article-date">
+        
+        <a href="/2018/08/20/SSRF简单学习总结/" class="archive-article-date">
   	<time datetime="2018-08-20T08:48:57.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-08-20</time>
 </a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/08/20/SSRF简单学习总结/">SSRF简单学习总结</a>
-    </h1>
-  
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h1><p>笔者由于之前对于SSRF，仅仅处于科普阶段，目前在渗透测试中，也只遇到过一例weblogic的SSRF漏洞，当然可能是由于笔者对此不熟悉，导致没有发现有该漏洞的地方，因此决定痛改前非，整体学习一下SSRF。</p>
+<h1 id="0x01-SSRF概述"><a href="#0x01-SSRF概述" class="headerlink" title="0x01 SSRF概述"></a>0x01 SSRF概述</h1><p>SSRF 即服务器端请求伪造，利用该漏洞可以发起内网攻击，危害巨大，但是由于一般开发者仅仅对于比较常见的SQL注入，XSS等比较熟悉，因此在开发时，可能会疏忽对于SSRF漏洞的防御手段</p>
+<p>SSRF可以实现以下攻击效果</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">内外网的端口及服务扫描</span><br><span class="line">内网主机敏感信息泄露</span><br><span class="line">通过HTTP的方式对内网web发起进攻，例如GET方式的sql注入，struts2漏洞，jboss漏洞等</span><br><span class="line">与XXE组成攻击链</span><br><span class="line">攻击内网程序，例如redis未授权</span><br><span class="line">利用file dict gopher协议读取内网本地信息</span><br></pre></td></tr></table></figure>
+<p>在这里可能有人会疑惑明明有可能是不同的协议，如果想去攻击非HTTP协议的怎么让不同的协议之间进行数据传输，这里就涉及到跨协议通信，这里简单介绍下，具体的参考<a href="http://www.freebuf.com/articles/web/19622.html" target="_blank" rel="noopener">跨协议通信</a></p>
+<p>跨协议通信，是指通过两种不同的协议可以交换指令和数据，其中一种叫做目标协议，另一种叫做载体协议，很冥想载体协议就是我们利用时写payload的协议，目标协议就是被攻击的协议，例如redis服务</p>
+<p>要想完成跨协议通信必须满足以下两点</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">目标协议必须要有很高的容错性  否则通过载体协议过去的指令无法执行</span><br><span class="line">载体协议能够封装目标协议的指令  如果不能封装，就无法写payload</span><br></pre></td></tr></table></figure>
+<h1 id="0x02-常见SSRF利用手段"><a href="#0x02-常见SSRF利用手段" class="headerlink" title="0x02 常见SSRF利用手段"></a>0x02 常见SSRF利用手段</h1><h2 id="0x0a-探索内网端口及服务"><a href="#0x0a-探索内网端口及服务" class="headerlink" title="0x0a 探索内网端口及服务"></a>0x0a 探索内网端口及服务</h2><p>  远程包含（本地包含）进行端口扫描，以bwapp渗透测试平台的环境为例，推荐下载owsap的靶机</p>
+<p>  配置完成虚拟机靶机后，物理机访问该靶机<a href="http://192.168.248.148/bWAPP/ssrf.php" target="_blank" rel="noopener">http://192.168.248.148/bWAPP/ssrf.php</a></p>
+<p><img src="\img\1534764437574.png" alt="bwapp"> </p>
+<p> 本小节只利用第一个任务，端口扫描，先获取一下官方的exp</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">echo &quot;&lt;script&gt;alert(\&quot;U 4r3 0wn3d by MME!!!\&quot;);&lt;/script&gt;&quot;;</span><br><span class="line">if(isset($_REQUEST[&quot;ip&quot;]))</span><br><span class="line">&#123;</span><br><span class="line">    //list of port numbers to scan</span><br><span class="line">    $ports = array(21, 22, 23, 25, 53, 80, 110, 1433, 3306);  //待扫描端口号</span><br><span class="line">    $results = array();</span><br><span class="line">    foreach($ports as $port)</span><br><span class="line">    &#123;</span><br><span class="line">        if($pf = @fsockopen($_REQUEST[&quot;ip&quot;], $port, $err, $err_string, 1))</span><br><span class="line">        &#123;</span><br><span class="line">            $results[$port] = true;</span><br><span class="line">            fclose($pf); </span><br><span class="line">        &#125;</span><br><span class="line">        else</span><br><span class="line">        &#123;</span><br><span class="line">            $results[$port] = false;        </span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    foreach($results as $port=&gt;$val)</span><br><span class="line">    &#123;</span><br><span class="line">        $prot = getservbyport($port,&quot;tcp&quot;);</span><br><span class="line">        echo &quot;Port $port ($prot): &quot;;</span><br><span class="line">        if($val)</span><br><span class="line">        &#123;</span><br><span class="line">            echo &quot;&lt;span style=\&quot;color:green\&quot;&gt;OK&lt;/span&gt;&lt;br/&gt;&quot;;</span><br><span class="line">        &#125;</span><br><span class="line">        else</span><br><span class="line">        &#123;</span><br><span class="line"></span><br><span class="line">            echo &quot;&lt;span style=\&quot;color:red\&quot;&gt;Inaccessible&lt;/span&gt;&lt;br/&gt;&quot;;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p> 就是利用了socket连接来探测端口是否开启，这里对应的端口都是默认服务端口，例如FTP，常见默认端口就是21，但有时候别人会修改默认端口号，因此这里仅仅是大多数情况下，如果要想判断具体是什么服务，还是需要走指纹特征匹配才可以。</p>
+<p>这里我们配合bwapp的RFI/LFI即远程文件包含/本地文件包含，这也是一般SSRF经常利用的地方，我们将官方的exp包含进去，exp中是使用request的方式，即可以提交post的请求也可以提交get请求，但是为了看起来清晰，建议使用post，测试如下</p>
+<p><img src="\img\1534814513491.png" alt="1534814513491"></p>
+<h2 id="0x0b-敏感信息泄露"><a href="#0x0b-敏感信息泄露" class="headerlink" title="0x0b 敏感信息泄露"></a>0x0b 敏感信息泄露</h2><p>敏感信息泄露，即可以读取配置信息，敏感数据，包括系统配置信息，数据库配置信息，账号与密码等，搭建靶机，使用PHP作为搭建语言，直接借用官方教程给的curl实例改编一下即可当作一个环境</p>
+<p><img src="\img\1534816130523.png" alt="1534816130523"></p>
+<p>将固定url换为GET或POST请求得到的即可，因此搭建环境的代码为</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">// 创建一个新cURL资源</span><br><span class="line">$ch = curl_init();</span><br><span class="line">// 设置URL和相应的选项</span><br><span class="line">curl_setopt($ch, CURLOPT_URL, $_GET[&apos;url&apos;]);</span><br><span class="line">curl_setopt($ch, CURLOPT_HEADER, false);</span><br><span class="line">// 抓取URL并把它传递给浏览器</span><br><span class="line">curl_exec($ch);</span><br><span class="line">//关闭cURL资源，并且释放系统资源</span><br><span class="line">curl_close($ch);</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p>可以使用PHP伪协议中的file协议读取本地敏感信息，为什么用file是由于file在php默认配置下即可使用，关于伪协议利用条件可以参考<a href="http://www.freebuf.com/column/148886.html" target="_blank" rel="noopener">伪协议</a>，简单构造一下payload，file:///C:windows/win.ini,读取windows系统配置文件，测试如下：</p>
+<p><img src="\img\1534816899993.png" alt="1534816899993"></p>
+<h2 id="0x0c-sql注入等常见GET方式注入"><a href="#0x0c-sql注入等常见GET方式注入" class="headerlink" title="0x0c sql注入等常见GET方式注入"></a>0x0c sql注入等常见GET方式注入</h2><h1 id="0x03-高级SSRF利用"><a href="#0x03-高级SSRF利用" class="headerlink" title="0x03 高级SSRF利用"></a>0x03 高级SSRF利用</h1><h2 id="0x0a-XXE组合漏洞"><a href="#0x0a-XXE组合漏洞" class="headerlink" title="0x0a XXE组合漏洞"></a>0x0a XXE组合漏洞</h2><h2 id="0x0b-攻击内网服务漏洞redis"><a href="#0x0b-攻击内网服务漏洞redis" class="headerlink" title="0x0b 攻击内网服务漏洞redis"></a>0x0b 攻击内网服务漏洞redis</h2><h2 id="0x0c-gopher协议应用"><a href="#0x0c-gopher协议应用" class="headerlink" title="0x0c gopher协议应用"></a>0x0c gopher协议应用</h2><h2 id="0x0d-dict协议应用"><a href="#0x0d-dict协议应用" class="headerlink" title="0x0d dict协议应用"></a>0x0d dict协议应用</h2><p> dict协议是一个字典服务协议，在ssrf中可以用来探测内网服务信息，导致信息泄露</p>
+<p>举例：可以用来直接探索常见的应用信息例如试试ssh 22，ftp 21，mysql 3306 ,redis6739等</p>
+<p><img src="\img\1534818901576.png" alt="1534818901576"></p>
+<h1 id="0x04-SSRF其他扩展"><a href="#0x04-SSRF其他扩展" class="headerlink" title="0x04 SSRF其他扩展"></a>0x04 SSRF其他扩展</h1><h2 id="0x0a-SSRF漏洞点"><a href="#0x0a-SSRF漏洞点" class="headerlink" title="0x0a SSRF漏洞点"></a>0x0a SSRF漏洞点</h2><h2 id="0x0b-SSRF绕过"><a href="#0x0b-SSRF绕过" class="headerlink" title="0x0b SSRF绕过"></a>0x0b SSRF绕过</h2><h2 id="0x0c-经典SSRF漏洞"><a href="#0x0c-经典SSRF漏洞" class="headerlink" title="0x0c 经典SSRF漏洞"></a>0x0c 经典SSRF漏洞</h2><p>  FFmpeg 的SSRF本地敏感信息泄露漏洞（CVE-2016-1897）<a href="http://www.freebuf.com/column/142775.html" target="_blank" rel="noopener">详情</a></p>
+<h1 id="0x05-参考资料"><a href="#0x05-参考资料" class="headerlink" title="0x05 参考资料"></a>0x05 参考资料</h1><p><a href="http://doc.redisfans.com/topic/protocol.html" target="_blank" rel="noopener">http://doc.redisfans.com/topic/protocol.html</a></p>
+<p><a href="http://www.freebuf.com/articles/web/19622.html" target="_blank" rel="noopener">http://www.freebuf.com/articles/web/19622.html</a></p>
+<p><a href="http://www.freebuf.com/column/157466.html" target="_blank" rel="noopener">http://www.freebuf.com/column/157466.html</a></p>
+<p><a href="https://blog.chaitin.cn/gopher-attack-surfaces/" target="_blank" rel="noopener">https://blog.chaitin.cn/gopher-attack-surfaces/</a></p>
+<p><a href="https://www.jianshu.com/p/ad7b8079e0d5" target="_blank" rel="noopener">https://www.jianshu.com/p/ad7b8079e0d5</a></p>
 
-        <div class="article-info info-on-right">
-          
+      
+
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>大爷，感谢打赏<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    
+                    <div class="reward-box-item">
+                      <img class="reward-img" src="/img/weixin.png">
+                      <span class="reward-type">微信</span>
+                    </div>
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
@@ -246,198 +273,115 @@
 		</ul>
 	</div>
 
-          
+      
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=http://yoursite.com/2018/08/20/SSRF简单学习总结/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/08/20/常见windows隐藏文件方式总结/" class="archive-article-date">
-  	<time datetime="2018-08-20T02:45:52.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-08-20</time>
-</a>
+<nav id="article-nav">
+  
+    <a href="/2018/08/28/struts2-057复现/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          struts2-057复现
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2018/08/20/常见windows隐藏文件方式总结/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">常见windows隐藏文件方式总结</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/08/20/常见windows隐藏文件方式总结/">常见windows隐藏文件方式总结</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">windows</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/08/15/绕过双重waf拿到魔改JCMS-WCM的XSS/" class="archive-article-date">
-  	<time datetime="2018-08-15T12:04:50.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-08-15</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/08/15/绕过双重waf拿到魔改JCMS-WCM的XSS/">绕过双重WAF拿到魔改JCMS+WCM的XSS</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">XSS</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/XSS//" class="article-tag-list-link color4">XSS</a>
-        		</li>
-      		
-		</ul>
-	</div>
+        
+        
+    </div>
+</aside>
 
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/08/15/你好-HEXO/" class="archive-article-date">
-  	<time datetime="2018-08-15T04:37:19.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-08-15</time>
-</a>
-        </div>
-    	 
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/08/15/你好-HEXO/">你好,HEXO</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/08/15/Hello-Blog/" class="archive-article-date">
-  	<time datetime="2018-08-15T02:36:56.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-08-15</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/08/15/Hello-Blog/">Hello Blog</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Love</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/08/15/hello-world/" class="archive-article-date">
-  	<time datetime="2018-08-15T02:30:45.759Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-08-15</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/08/15/hello-world/">Hello World</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
   
-  
-    </div></section>
-  
-
-    
 
 
           </div>
@@ -460,8 +404,8 @@
 	var yiliaConfig = {
 		mathjax: true,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,
