@@ -395,17 +395,17 @@
       
         <h1 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h1><p>作为CTF中的菜鸡，嗯emmm。。。。,不出意外的一个题没刷出来，一方面是因为菜，另一方面跟这次比赛下发题目机制有关，不过菜是原罪，web题目，团队只刷出来了两道，一道comment ，一道blog。比赛结束后，菜鸡拿到wp，对着wp复现学习一下</p>
 <h1 id="0x01-comment"><a href="#0x01-comment" class="headerlink" title="0x01 comment"></a>0x01 comment</h1><p>看到这个题，首先要登陆，不过官方给的有提示，zhangwei，一看就是bp爆破一下的事，爆破位数三位，就算加上字母跟特殊字符也就几分钟的事，这里不是重点，结果是666，嗯，很符合ctf赛题的特征，用户名zhangwei，密码zhangwei666</p>
-<p><img src="\public\img\1535943213083.png" alt="1535943213083"></p>
+<p><img src="\img\1535943213083.png" alt="1535943213083"></p>
 <p>看到是留言板，且可以发帖，查看详情以及留言列表，通常这种题一般就是存储型XSS或者就是二次注入，一般存储型XSS，官方会做bot来自动回应，这里暂时不知道什么东西，但是ctf赛题另一个特点就是很多时候存在源代码泄露，避免参赛者不知道比赛的考点，在实际渗透测试中源代码泄露一般很少，这里存在git源代码泄露</p>
-<p><img src="\public\img\1535943441626.png" alt="1535943441626"></p>
-<p><img src="\public\img\1535943516614.png" alt="1535943516614"></p>
+<p><img src="\img\1535943441626.png" alt="1535943441626"></p>
+<p><img src="\img\1535943516614.png" alt="1535943516614"></p>
 <p>使用GitHack来利用git源代码泄露</p>
-<p><img src="\public\img\1535943619238.png" alt="1535943619238"></p>
+<p><img src="\img\1535943619238.png" alt="1535943619238"></p>
 <p>可以看到下载了一个write_do.php查看源代码分析一下</p>
-<p><img src="\public\img\1535943710953.png" alt="1535943710953"></p>
+<p><img src="\img\1535943710953.png" alt="1535943710953"></p>
 <p>可以看到这点东西根本无法进行源代码审计，这里肯定要考察到对git真正的了解与用法了，不能小白式玩别人写好的工具了，<a href="http://gitbook.liuhui998.com/1_2.html" target="_blank" rel="noopener">git的详细原理教程</a>，这里用了git stash来存储的，wp参考柠檬大佬<a href="http://www.cnblogs.com/iamstudy/articles/wangding_4th_game_web_writeup.html" target="_blank" rel="noopener">wp</a>,其中关于这一部分源代码获取还是没搞太懂，先放着吧，</p>
 <p>分析一下源代码：</p>
-<p><img src="D:\hexo\blog\public\img\1535956022372.png" alt="1535956022372"></p>
+<p><img src="\img\1535956022372.png" alt="1535956022372"></p>
 <p>可以看到应该不是xss，是二次注入了，通过源代码审计可以得到有两个表，且其中有共同的一个字段</p>
 <p>board ： category   title  content  bo_id</p>
 <p>comment : category content bo_id  </p>
@@ -415,11 +415,11 @@
 <p>当取出来有放在comment表时,闭合不够完全，在评论中加入*/#</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">insert into comment set category = &apos;&apos;,content=user(),/*&apos;,content = &apos;*/#&apos;,bo_id = &apos;x&apos;</span><br></pre></td></tr></table></figure>
 <p>测试一下</p>
-<p><img src="\public\img\1535959945747.png" alt="1535959945747"></p>
-<p><img src="\public\img\1535959961391.png" alt="1535959961391"></p>
+<p><img src="\img\1535959945747.png" alt="1535959945747"></p>
+<p><img src="\img\1535959961391.png" alt="1535959961391"></p>
 <p>之后就用常规的sql注入方法进行注入，如下</p>
-<p><img src="\public\img\1535960047934.png" alt="1535960047934"></p>
-<p><img src="=\public\img\1535960069294.png" alt="1535960069294"></p>
+<p><img src="\img\1535960047934.png" alt="1535960047934"></p>
+<p><img src="\img\1535960069294.png" alt="1535960069294"></p>
 <p>刷完所有的数据发现并不在数据库中，那么就测试是否存在于服务器其他文件，然而我按照别人wp没复现成功又gg了</p>
 
       
@@ -1520,11 +1520,7 @@ MathJax.Hub.Queue(function() {
           <ul class="article-tag-list" q-show="showTags">
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">Love</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">二进制安全</a>
+                <a href="javascript:void(0)" class="js-tag color1">SSRF WEB安全</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1532,7 +1528,11 @@ MathJax.Hub.Queue(function() {
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">SSRF WEB安全</a>
+                <a href="javascript:void(0)" class="js-tag color5">Love</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">注入 web安全</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1544,7 +1544,7 @@ MathJax.Hub.Queue(function() {
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">CTF学习</a>
+                <a href="javascript:void(0)" class="js-tag color1">二进制安全</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1552,7 +1552,7 @@ MathJax.Hub.Queue(function() {
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">注入 web安全</a>
+                <a href="javascript:void(0)" class="js-tag color1">CTF学习</a>
               </li>
             
             <div class="clearfix"></div>
