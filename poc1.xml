@@ -1,0 +1,8 @@
+<?xml-stylesheet type="text/xml" href=""?>
+<!DOCTYPE p [
+<!ENTITY token SYSTEM "file:///etc/tce_dynamic/identity.token">
+]> 
+<p>
+</p>/indentity:
+    &token;
+</p>
