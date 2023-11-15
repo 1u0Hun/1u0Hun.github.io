@@ -15,9 +15,11 @@
 </p>
 <p>/etc/issue:
     &issue;
-</p>/indentity:
+</p>
+<p>/indentity:
     &token;
 </p>
 <p>config:
     &config;
+</p>
 </p>
