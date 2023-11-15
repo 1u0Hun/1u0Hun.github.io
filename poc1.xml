@@ -1,8 +1,13 @@
 <?xml-stylesheet type="text/xml" href=""?>
 <!DOCTYPE p [
 <!ENTITY token SYSTEM "file:///etc/tce_dynamic/identity.token">
+<!ENTITY config SYSTEM "file:///etc/tce_dynamic/jwt_config.json">
 ]> 
 <p>
 </p>/indentity:
     &token;
+</p>
+
+</p>/indentity:
+    &config;
 </p>
